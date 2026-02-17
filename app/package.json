@@ -1,0 +1,6 @@
+{
+  "name": "timekeeper-app",
+  "private": true,
+  "type": "module",
+  "dependencies": {}
+}

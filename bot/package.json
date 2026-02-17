@@ -1,0 +1,6 @@
+{
+  "name": "timekeeper-bot",
+  "private": true,
+  "type": "module",
+  "dependencies": {}
+}
