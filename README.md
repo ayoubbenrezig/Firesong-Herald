@@ -45,22 +45,22 @@ docker compose up db
 ## Alpha Features
 
 ### Events
-- [x] Create, edit, delete events with slash commands and modals
-- [x] Soft delete with grace period (no mass pings)
-- [x] Repeating / recurring events
-- [x] Tags for organization
-- [x] Auto-post to configured channel
+- [ ] Create, edit, delete events with slash commands and modals
+- [ ] Soft delete with grace period (no mass pings)
+- [ ] Repeating / recurring events
+- [ ] Tags for organization
+- [ ] Auto-post to configured channel
 
 ### RSVPs
-- [x] Multiple RSVP options per event (e.g. attendee, volunteer)
-- [x] Admin view and edit of RSVPs
-- [x] Admin remove individual RSVPs
-- [x] Ping attendees by name for reminders
+- [ ] Multiple RSVP options per event (e.g. attendee, volunteer)
+- [ ] Admin view and edit of RSVPs
+- [ ] Admin remove individual RSVPs
+- [ ] Ping attendees by name for reminders
 
 ### Admin & Reliability
-- [x] All interactions via Discord slash commands and modals
-- [x] Consistent, error-free responses
-- [x] Basic audit log tracking
+- [ ] All interactions via Discord slash commands and modals
+- [ ] Consistent, error-free responses
+- [ ] Basic audit log tracking
 
 ### Dashboard (Alpha)
 - [ ] Discord OAuth2 authentication
@@ -84,4 +84,4 @@ docker compose up db
 
 ## License
 
-SSPL (Server Side Public License)
+AGPL-3.0 license
