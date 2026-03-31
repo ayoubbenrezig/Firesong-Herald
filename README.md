@@ -1,43 +1,38 @@
-# Timekeeper
+# Firesong Herald
 
-A Discord bot for time management and tracking.
+A Discord bot for event management — signups, RSVPs, reminders, and a live web dashboard.
 
 ## Setup
 
 1. Clone the repository
 ```bash
-git clone https://github.com/ayoubbenrezig/Timekeeper.git
-cd Timekeeper
+git clone https://github.com/ayoubbenrezig/Firesong-Herald.git
+cd Firesong-Herald
 ```
 
-2. Install dependencies
-```bash
-npm install
-```
-
-3. Create a `.env` file in the root directory
+2. Create a `.env` file in the root directory
 ```env
 DISCORD_TOKEN=your_bot_token_here
 CLIENT_ID=your_client_id_here
+POSTGRES_USER=your_db_user
+POSTGRES_PASSWORD=your_db_password
+POSTGRES_DB=your_db_name
+POSTGRES_PORT=5432
+DATABASE_URL=postgresql://your_db_user:your_db_password@db:5432/your_db_name
 ```
 
-4. Run the bot
+3. Start the stack
 ```bash
-npm start
-```
-
-## Development
-
-For development with auto-restart:
-```bash
-npm run dev
+docker compose --profile bot up
 ```
 
 ## Features
 
-- [ ] Time tracking
-- [ ] Reminders
-- [ ] Time zone conversion
+- [ ] Event creation, editing, and deletion
+- [ ] Repeating / recurring events
+- [ ] Multiple RSVP options per event
+- [ ] Discord OAuth2 dashboard
+- [ ] Live sync via WebSockets
 
 ## License
 
