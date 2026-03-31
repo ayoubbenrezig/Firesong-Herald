@@ -63,8 +63,14 @@ The bot implements five core feature areas. Reference MVP.md and USER_FEEDBACK.m
 
 ### Development Setup
 
-1. Clone and install dependencies in `bot/` and `dashboard/` (currently empty, will need npm packages)
-2. Create `.env` file in project root with Discord token, database credentials:
+1. Clone and install dependencies:
+   ```bash
+   git clone https://github.com/ayoubbenrezig/Firesong-Herald.git
+   cd Firesong-Herald
+   npm install --workspaces  # Or: cd bot && npm install && cd ../dashboard && npm install
+   ```
+
+2. Create `.env` file in project root with Discord token and database credentials:
    ```env
    DISCORD_TOKEN=your_bot_token
    CLIENT_ID=your_client_id
@@ -74,8 +80,21 @@ The bot implements five core feature areas. Reference MVP.md and USER_FEEDBACK.m
    POSTGRES_PORT=5432
    DATABASE_URL=postgresql://postgres:password@db:5432/firesong_db
    ```
-3. Start the full stack: `docker compose --profile bot up`
-4. Start only the database: `docker compose up db`
+
+3. **Development Mode (with auto-reload):**
+   ```bash
+   # Bot: Run from bot/ directory
+   cd bot && npm run dev
+   
+   # Dashboard: Run from dashboard/ directory (separate terminal)
+   cd dashboard && npm run dev
+   ```
+
+4. **Production Mode (Docker):**
+   ```bash
+   docker compose --profile bot up    # Start bot + database
+   docker compose up db               # Start only database
+   ```
 
 **Container Architecture:**
 - `db:` Always runs (no profile), persists to `db_data` volume
@@ -84,9 +103,10 @@ The bot implements five core feature areas. Reference MVP.md and USER_FEEDBACK.m
 
 ### Important Notes
 
-- The bot's `index.js` is currently a placeholder (`console.log + infinite interval`)
+- The bot's entry point is `bot/src/index.ts` (compiled to `dist/index.js` on build). The root `bot/index.js` is a legacy placeholder and should be ignored.
 - Database `init.sql` is empty — schema will be created by Prisma migrations
-- Package.json files have no dependencies yet — these must be added as bot and dashboard code grows
+- Dependencies are already defined: bot includes `discord.js`, `@prisma/client`, `dotenv`; dashboard includes Svelte, Vite, and `@prisma/client`
+- For TypeScript setup details, migration patterns, and strict mode configuration, see `TYPESCRIPT_SETUP.md`
 
 ---
 
@@ -108,6 +128,26 @@ Examples:
 - ❌ `add event creation` (wrong case, no type prefix)
 
 **Versioning:** `vX.Y.Z-stage` (stage = alpha, beta, or omitted for full release). Version counter resets on stage change (e.g., `v0.4.0-alpha` → `v0.1.0-beta`).
+
+### TypeScript Development Pattern (See TYPESCRIPT_SETUP.md for details)
+
+**Bot Development:**
+- Code lives in `bot/src/` as `.ts` files (e.g., `bot/src/commands/event.ts`)
+- Development: `npm run dev` from `bot/` directory (uses `tsx` for live reload)
+- Building: `npm run build` compiles `src/**/*.ts` → `dist/` (git-ignored)
+- Production: `npm start` runs `dist/index.js`
+- TypeScript is in **strict mode** — no implicit `any`, unused vars, or unsafe nulls
+
+**Dashboard Development:**
+- Code in `dashboard/src/` with `.ts` and `.svelte` files
+- Development: `npm run dev` from `dashboard/` (Vite dev server on localhost:5173)
+- Building: `npm run build` outputs production-ready assets to `dist/`
+- TypeScript strict mode applies here too — all errors must be fixed before compilation
+
+**Type Safety:**
+- Prisma auto-generates types from schema — always import from `@prisma/client` (never `any` types)
+- Discord.js types come from the package — trust them, don't cast
+- Environment variables: TypeScript won't catch `undefined` envs at compile time; check at runtime (see `bot/src/index.ts` example)
 
 ### Architecture & Code Organization
 
@@ -208,6 +248,7 @@ User B and C flagged issues with repeating event RSVP state. The implementation 
 |---|---|
 | `MVP.md` | Defines Alpha scope, tech stack rationale, feature list by stage |
 | `COMMIT_STYLE.md` | Commit message format and versioning rules |
+| `TYPESCRIPT_SETUP.md` | TypeScript migration details, strict mode, dev/build workflow |
 | `USER_FEEDBACK.md` | Consolidated requirements from community testers, pain points |
 | `README.md` | Setup instructions and feature checklist |
 | `compose.yml` | Service definitions (db, bot, dashboard) and profiles |
