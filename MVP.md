@@ -48,7 +48,7 @@ SvelteKit Dashboard
 
 ## Scope
 
-The Alpha release focuses entirely on the bot. The dashboard is planned for a later cycle once the bot is stable and the data layer is proven. The database is included from day one so the dashboard can be added without rearchitecting anything.
+The Alpha release includes the Discord bot AND a SvelteKit dashboard for event and RSVP management. The database is included from day one and is the single source of truth, with both bot and dashboard reading/writing to it via Prisma.
 
 ---
 
@@ -73,6 +73,13 @@ The Alpha release focuses entirely on the bot. The dashboard is planned for a la
 - [ ] All interactions via Discord slash commands and modals
 - [ ] Consistent, error-free responses, no repeated-click issues
 
+### Dashboard
+- [ ] Discord OAuth2 authentication
+- [ ] Event management UI (create, edit, delete)
+- [ ] RSVP management interface
+- [ ] Live sync via WebSockets
+- [ ] Permission handling and display
+
 ---
 
 ## Out of Scope for Alpha
@@ -88,6 +95,7 @@ These are confirmed for later cycles.
 - Text formatting in event posts
 - Role-based daily pings
 - Daily auto-post with upcoming events
+- Mobile experience improvements
 
 ### Full Release
 - Role grouping, conditional sign-up logic
@@ -96,9 +104,7 @@ These are confirmed for later cycles.
 - Restrict repeat no-shows to limited roles
 - Personal weekly schedule view
 - Discord calendar integration
-- SvelteKit dashboard (requires Discord OAuth, PostgreSQL already in place)
-- Mobile experience improvements
-- Cross-server event view
+- Cross-server event views
 - External announcement system integration
 - Host profiles
 

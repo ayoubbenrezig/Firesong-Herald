@@ -1,6 +1,22 @@
 {
-  "name": "timekeeper-app",
+  "name": "firesong-dashboard",
+  "version": "0.1.0-alpha",
   "private": true,
   "type": "module",
-  "dependencies": {}
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^3.0.0",
+    "@types/node": "^20.0.0",
+    "svelte": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^5.0.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.0.0",
+    "dotenv": "^16.0.0"
+  }
 }

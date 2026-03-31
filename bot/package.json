@@ -1,6 +1,21 @@
 {
-  "name": "timekeeper-bot",
+  "name": "firesong-bot",
+  "version": "0.1.0-alpha",
   "private": true,
   "type": "module",
-  "dependencies": {}
+  "scripts": {
+    "dev": "node --loader tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "tsx": "^4.0.0"
+  },
+  "dependencies": {
+    "discord.js": "^14.0.0",
+    "@prisma/client": "^5.0.0",
+    "dotenv": "^16.0.0"
+  }
 }
