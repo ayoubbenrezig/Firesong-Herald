@@ -4,8 +4,36 @@
 // Main bot service initialization, event handlers, and startup logic.
 // Uses Discord.js v14+ with TypeScript strict mode.
 
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import { Client, GatewayIntentBits } from 'discord.js';
+
+// Load .env from project root
+// Try multiple possible locations to handle different execution contexts
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const possiblePaths = [
+    path.resolve(__dirname, '../../.env'),      // When running from bot/ directory
+    path.resolve(process.cwd(), '.env'),        // Current working directory
+    path.resolve(process.cwd(), '..', '.env'),  // Parent of current directory
+];
+
+let envPath: string | null = null;
+for (const p of possiblePaths) {
+    if (fs.existsSync(p)) {
+        envPath = p;
+        console.log(`ℹ️  Loading .env from: ${p}`);
+        break;
+    }
+}
+
+if (envPath) {
+    dotenv.config({ path: envPath });
+} else {
+    console.warn('⚠️  .env file not found, relying on system environment variables');
+}
 
 // ============================================================================
 // ENVIRONMENT VALIDATION
@@ -13,13 +41,13 @@ import { Client, GatewayIntentBits } from 'discord.js';
 // Verify required environment variables are present before initializing bot.
 
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
-const CLIENT_ID = process.env.CLIENT_ID;
+const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
 
-if (!DISCORD_TOKEN || !CLIENT_ID) {
+if (!DISCORD_TOKEN || !DISCORD_CLIENT_ID) {
     console.error(
         '❌ Missing required environment variables:\n' +
         '   - DISCORD_TOKEN (from Discord Developer Portal)\n' +
-        '   - CLIENT_ID (bot application ID)\n' +
+        '   - DISCORD_CLIENT_ID (bot application ID)\n' +
         '\n   Please check your .env file.'
     );
     process.exit(1);
