@@ -1,7 +1,7 @@
 import { Client } from 'discord.js';
 import { readdirSync } from 'fs';
 import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -13,9 +13,12 @@ export async function loadEvents(client: Client): Promise<void> {
 
     // Import and register each event handler
     for (const file of files) {
-        const event = await import(join(__dirname, file));
+        const event = await import(pathToFileURL(join(__dirname, file)).href);
         if (event.name && event.execute) {
-            client.on(event.name, event.execute);
-        }
+            if (event.once) {
+                client.once(event.name, event.execute);
+            } else {
+                client.on(event.name, event.execute);
+            }        }
     }
 }
