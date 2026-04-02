@@ -9,15 +9,16 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { Client, GatewayIntentBits } from 'discord.js';
+import { loadCommands } from './handlers/commandHandler.js';
+import { loadEvents } from './handlers/eventHandler.js';
 
 // Load .env from project root
-// Try multiple possible locations to handle different execution contexts
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const possiblePaths = [
-    path.resolve(__dirname, '../../.env'),      // When running from bot/ directory
-    path.resolve(process.cwd(), '.env'),        // Current working directory
-    path.resolve(process.cwd(), '..', '.env'),  // Parent of current directory
+    path.resolve(__dirname, '../../.env'),
+    path.resolve(process.cwd(), '.env'),
+    path.resolve(process.cwd(), '..', '.env'),
 ];
 
 let envPath: string | null = null;
@@ -38,7 +39,6 @@ if (envPath) {
 // ============================================================================
 // ENVIRONMENT VALIDATION
 // ============================================================================
-// Verify required environment variables are present before initializing bot.
 
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
 const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
@@ -56,42 +56,22 @@ if (!DISCORD_TOKEN || !DISCORD_CLIENT_ID) {
 // ============================================================================
 // CLIENT INITIALIZATION
 // ============================================================================
-// Create Discord.js client with necessary intents.
-// Intents: Guilds (for slash commands in servers)
 
 const client = new Client({
     intents: [GatewayIntentBits.Guilds],
 });
 
 // ============================================================================
-// EVENT HANDLERS
-// ============================================================================
-
-// Bot ready event — fires once after successful login
-client.on('ready', () => {
-    console.log(`✅ Bot logged in as ${client.user?.tag}`);
-    console.log(`   ID: ${client.user?.id}`);
-    console.log(`   Serving ${client.guilds.cache.size} guild(s)`);
-});
-
-// Interaction handler — processes slash commands and other interactions
-client.on('interactionCreate', async (interaction) => {
-    // Only handle slash commands for now
-    if (!interaction.isChatInputCommand()) return;
-
-    // Echo command — test slash command
-    if (interaction.commandName === 'ping') {
-        await interaction.reply('Pong! 🏓');
-    }
-});
-
-// Error handler — log uncaught errors
-client.on('error', (error) => {
-    console.error('❌ Discord.js error:', error);
-});
-
-// ============================================================================
 // STARTUP
 // ============================================================================
 
-client.login(DISCORD_TOKEN);
+async function start(): Promise<void> {
+    await loadCommands(client as any);
+    await loadEvents(client);
+    await client.login(DISCORD_TOKEN);
+}
+
+start().catch((error) => {
+    console.error('❌ Failed to start bot:', error);
+    process.exit(1);
+});
