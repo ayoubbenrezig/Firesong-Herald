@@ -82,6 +82,20 @@ docker compose up db
 - Event restrictions by role
 - Cross-server event views
 
+## Contributing
+
+Contributions are welcome. Please read the following before opening issues or pull requests:
+
+- [Contributing Guidelines](./CONTRIBUTING.md)
+- [Git Conventions](./GIT_CONVENTIONS.md)
+- [Code of Conduct](./CODE_OF_CONDUCT.md)
+
+To report a bug, use the [bug report template](/.github/ISSUE_TEMPLATE/bug_report.md). To suggest a feature, use the [feature request template](/.github/ISSUE_TEMPLATE/feature_request.md).
+
+## Contact
+
+For general enquiries or conduct reports, reach out at contact@firesongherald.com.
+
 ## License
 
-AGPL-3.0 license
+[AGPL-3.0](./LICENSE)
