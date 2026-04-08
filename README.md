@@ -46,13 +46,13 @@ docker compose up db
 
 ### Events
 - [ ] Create, edit, delete events with slash commands and modals
-- [ ] Soft delete with grace period (no mass pings)
+- [ ] Soft delete with grace period
 - [ ] Repeating / recurring events
 - [ ] Tags for organization
 - [ ] Auto-post to configured channel
 
 ### RSVPs
-- [ ] Multiple RSVP options per event (e.g. attendee, volunteer)
+- [ ] Multiple RSVP options per event
 - [ ] Admin view and edit of RSVPs
 - [ ] Admin remove individual RSVPs
 - [ ] Ping attendees by name for reminders
