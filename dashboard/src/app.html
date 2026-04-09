@@ -1,13 +1,16 @@
 <!doctype html>
-<html lang="en" data-theme="catppuccin">
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="text-scale" content="scale" />
     <script>
-        const saved = localStorage.getItem('mode');
-        const mode = saved ?? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        const savedMode = localStorage.getItem('mode');
+        const mode = savedMode ?? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         document.documentElement.setAttribute('data-mode', mode);
+
+        const savedTheme = localStorage.getItem('theme');
+        document.documentElement.setAttribute('data-theme', savedTheme ?? 'catppuccin');
     </script>
     %sveltekit.head%
 </head>
