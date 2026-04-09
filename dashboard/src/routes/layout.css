@@ -5,3 +5,4 @@
 
 @plugin '@tailwindcss/typography';
 
+@custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));
