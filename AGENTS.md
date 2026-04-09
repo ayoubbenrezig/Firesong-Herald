@@ -30,7 +30,7 @@ The bot implements five core feature areas. Reference MVP.md and USER_FEEDBACK.m
 - Create, edit, delete with slash commands and modals
 - Soft delete with grace period (no mass pings on permanent removal)
 - Repeating/recurring events
-- Tags for organization
+- Tags for organising
 - Auto-post to configured channel
 
 **RSVPs:**
@@ -73,13 +73,15 @@ The bot implements five core feature areas. Reference MVP.md and USER_FEEDBACK.m
 2. Create `.env` file in project root with Discord token and database credentials:
    ```env
    DISCORD_TOKEN=your_bot_token
-   CLIENT_ID=your_client_id
+   DISCORD_CLIENT_ID=your_client_id
    POSTGRES_USER=postgres
    POSTGRES_PASSWORD=password
    POSTGRES_DB=firesong_db
    POSTGRES_PORT=5432
    DATABASE_URL=postgresql://postgres:password@db:5432/firesong_db
    ```
+   
+   **Note:** The bot searches for `.env` in multiple locations (project root, working directory, parent) and logs which path it loads. See `bot/src/index.ts` for runtime validation logic.
 
 3. **Development Mode (with auto-reload):**
    ```bash
@@ -112,12 +114,12 @@ The bot implements five core feature areas. Reference MVP.md and USER_FEEDBACK.m
 
 ## Project Conventions & Patterns
 
-### Commit Style (see COMMIT_STYLE.md)
+### Commit Style (see GIT_CONVENTIONS.md)
 
 Always use **PascalCase Type prefix** in commit messages:
 
 ```
-Type: past-tense description of what was done
+Type: description of what was done
 ```
 
 Types: `Add`, `Fix`, `Refactor`, `Update`, `Cleanup`, `Init`, `Release`, `Docs`, `Remove`
@@ -127,7 +129,13 @@ Examples:
 - ✅ `Fix: resolved RSVP state breakage in repeating events`
 - ❌ `add event creation` (wrong case, no type prefix)
 
+When resolving issues, include in commit body: `Closes #123` or `Related to #123`.
+
 **Versioning:** `vX.Y.Z-stage` (stage = alpha, beta, or omitted for full release). Version counter resets on stage change (e.g., `v0.4.0-alpha` → `v0.1.0-beta`).
+
+**Branch Naming:** Use `type/short-description` (e.g., `feature/event-creation`, `fix/rsvp-state-breakage`, `docs/setup-guide`).
+
+**PR Strategy:** Squash and merge always. Open PRs for logic/structure changes; commit cosmetic/typo fixes directly to main.
 
 ### TypeScript Development Pattern (See TYPESCRIPT_SETUP.md for details)
 
@@ -162,28 +170,48 @@ Each service (bot, dashboard) is independently containerized. Database is the si
 
 ### Slash Commands Pattern (Expected)
 
-Based on Discord.js and the bot's scope, slash commands will likely use a structure like:
-```javascript
-// Pseudo-example
-new SlashCommandBuilder()
-  .setName("event")
-  .addSubcommand(sub => sub.setName("create").addStringOption(opt => opt.setName("title")))
-  .addSubcommand(sub => sub.setName("list"))
+Based on Discord.js and the bot's scope, slash commands are organized by feature domain:
+
+**Directory Structure:**
+```
+bot/src/commands/
+  ├── admin/      # Administrative commands (manage events, RSVPs, guild settings)
+  ├── calendar/   # Calendar and event browsing commands
+  ├── rsvp/       # RSVP and signup management commands
+  ├── scheduling/ # Reminder and scheduling-related commands
+  └── utility/    # General utility commands (ping, help, etc.)
 ```
 
-Modals handle multi-field input (event description, date, time, tags). Responses are non-ephemeral for audit trail visibility.
+**Implementation Pattern:**
+Each command is a `.ts` file exporting a `SlashCommandBuilder` with handlers. Example structure:
+
+```typescript
+new SlashCommandBuilder()
+  .setName("event")
+  .setDescription("Manage events")
+  .addSubcommand(sub => 
+    sub.setName("create")
+      .setDescription("Create a new event")
+      .addStringOption(opt => opt.setName("title").setRequired(true))
+  )
+```
+
+Modals handle multi-field input (event description, date, time, tags). Responses are non-ephemeral for audit trail visibility. Command handlers live in `bot/src/handlers/commandHandler.ts`.
 
 ### Database Access (Prisma Pattern)
 
 When implementing features, use Prisma client:
-```javascript
-// Example (not real schema yet)
+```typescript
+// Example
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 const event = await prisma.event.create({
   data: { title, description, authorId }
 });
 ```
 
-No raw SQL. Prisma provides type safety and auto-migration support. Schema lives in `prisma/schema.prisma` (to be created).
+No raw SQL. Prisma provides type safety and auto-migration support. Schema lives in `prisma/schema.prisma`. Generated types are output to `prisma/generated/prisma` (configured in schema's `generator client`). Always import types from `@prisma/client`.
 
 ---
 
@@ -207,8 +235,10 @@ No raw SQL. Prisma provides type safety and auto-migration support. Schema lives
 
 Every service reads `.env` at root. Required variables:
 ```
-DISCORD_TOKEN, CLIENT_ID, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, POSTGRES_PORT, DATABASE_URL
+DISCORD_TOKEN, DISCORD_CLIENT_ID, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB, POSTGRES_PORT, DATABASE_URL
 ```
+
+**Environment Validation:** The bot validates `DISCORD_TOKEN` and `DISCORD_CLIENT_ID` at startup (see `bot/src/index.ts`). If either is missing, startup fails with a clear error message. This prevents silent failures in production.
 
 Dashboard and bot can have service-specific vars (not yet defined).
 
@@ -247,7 +277,7 @@ User B and C flagged issues with repeating event RSVP state. The implementation 
 | File | Purpose |
 |---|---|
 | `MVP.md` | Defines Alpha scope, tech stack rationale, feature list by stage |
-| `COMMIT_STYLE.md` | Commit message format and versioning rules |
+| `GIT_CONVENTIONS.md` | Commit message format and versioning rules |
 | `TYPESCRIPT_SETUP.md` | TypeScript migration details, strict mode, dev/build workflow |
 | `USER_FEEDBACK.md` | Consolidated requirements from community testers, pain points |
 | `README.md` | Setup instructions and feature checklist |
