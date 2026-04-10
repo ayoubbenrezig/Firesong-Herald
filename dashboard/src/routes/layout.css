@@ -13,3 +13,19 @@
 @plugin '@tailwindcss/typography';
 
 @custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));
+
+/* Sidebar separation */
+nav {
+    border-right: 1px solid color-mix(in oklab, var(--color-surface-500) 20%, transparent);
+}
+/* Theme selector buttons — unselected state */
+.btn.preset-outlined-surface-500 {
+    border-color: color-mix(in oklab, var(--color-surface-500) 40%, transparent);
+    box-shadow: 0 2px 8px color-mix(in oklab, black 20%, transparent);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.btn.preset-outlined-surface-500:hover {
+    border-color: color-mix(in oklab, var(--color-primary-500) 60%, transparent);
+    box-shadow: 0 4px 16px color-mix(in oklab, var(--color-primary-500) 12%, transparent);
+}
