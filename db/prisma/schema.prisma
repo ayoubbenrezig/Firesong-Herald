@@ -69,6 +69,12 @@ enum AuditAction {
   role_removed
 }
 
+enum CalendarFrequency {
+  daily
+  weekly
+  custom
+}
+
 // ---------------------------------------------------------------------------
 // Models
 // ---------------------------------------------------------------------------
@@ -87,6 +93,7 @@ model Server {
 
   roles      ServerRole[]
   events     Event[]
+  calendars  Calendar[]
   auditLogs  AuditLog[]
 
   @@map("servers")
@@ -110,7 +117,6 @@ model ServerRole {
   server Server @relation(fields: [discordServerId], references: [discordServerId])
 
   @@unique([discordServerId, discordRoleId])
-
   @@map("server_roles")
 }
 
@@ -175,7 +181,6 @@ model Event {
   alerts      EventAlert[]
 
   @@index([discordServerId])
-
   @@map("events")
 }
 
@@ -255,7 +260,6 @@ model Signup {
 
   @@unique([eventId, rsvpOptionId, discordUserId])
   @@index([discordUserId])
-
   @@map("signups")
 }
 
@@ -367,6 +371,53 @@ model AuditLog {
   server Server @relation(fields: [discordServerId], references: [discordServerId])
 
   @@index([discordServerId])
-
   @@map("audit_logs")
+}
+
+// ───── Calendar ─────
+/// A scheduled calendar that posts upcoming events to a configured channel.
+model Calendar {
+  /// Internal CUID.
+  id                 String            @id @default(cuid())
+
+  /// The server this calendar belongs to.
+  discordServerId    String            @map("discord_server_id")
+
+  /// The Discord channel ID where the calendar is posted.
+  channelId          String            @map("channel_id")
+
+  /// The persistent Discord message ID. Nullable until first post.
+  messageId          String?           @map("message_id")
+
+  /// Discord user ID of the admin who created this calendar.
+  createdBy          String            @map("created_by")
+
+  /// How many days ahead the calendar displays events. Default is 6.
+  displayDays        Int               @default(6) @map("display_days")
+
+  /// How often the calendar is reposted.
+  frequency          CalendarFrequency
+
+  /// Custom interval in days, used when frequency is `custom`.
+  customIntervalDays Int?              @map("custom_interval_days")
+
+  /// Time of day to repost, stored as "HH:MM" in 24h UTC-equivalent format.
+  postAt             String            @map("post_at")
+
+  /// IANA timezone string for the post time e.g. "America/New_York".
+  timezone           String
+
+  /// Discord role ID to ping on repost. Null means no ping.
+  pingRoleId         String?           @map("ping_role_id")
+
+  /// Whether this calendar is active.
+  status             ServerStatus
+
+  /// Timestamp of when this calendar was created.
+  createdAt          DateTime          @default(now()) @map("created_at")
+
+  server Server @relation(fields: [discordServerId], references: [discordServerId])
+
+  @@index([discordServerId])
+  @@map("calendars")
 }
