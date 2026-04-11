@@ -1,8 +1,372 @@
+// ---------------------------------------------------------------------------
+// Configuration
+// ---------------------------------------------------------------------------
+
+/// Prisma Client code generator configuration.
+/// Generates TypeScript client from the schema with auto-generated types.
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
 }
 
+/// Database source configuration.
+/// Uses PostgreSQL as the primary relational database.
 datasource db {
   provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum ServerStatus {
+  active
+  inactive
+}
+
+enum PermissionLevel {
+  admin
+  host
+}
+
+enum EventStatus {
+  draft
+  active
+  cancelled
+  completed
+  deleted
+}
+
+enum RecurrenceFrequency {
+  daily
+  weekly
+  biweekly
+  every_3_weeks
+  monthly
+  custom
+}
+
+enum RecurrenceUnit {
+  days
+  weeks
+  months
+}
+
+enum ColorScheme {
+  light
+  dark
+  system
+}
+
+enum AuditAction {
+  event_created
+  event_edited
+  event_cancelled
+  event_deleted
+  event_restored
+  rsvp_removed
+  role_added
+  role_removed
+}
+
+// ---------------------------------------------------------------------------
+// Models
+// ---------------------------------------------------------------------------
+
+// ───── Server ─────
+/// A Discord server that has added the bot.
+model Server {
+  /// The Discord guild snowflake ID — serves as the primary key.
+  discordServerId String       @id @map("discord_server_id")
+
+  /// Whether this server is actively using the bot.
+  status          ServerStatus @default(active)
+
+  /// Timestamp of when this server record was first created.
+  createdAt       DateTime     @default(now()) @map("created_at")
+
+  roles      ServerRole[]
+  events     Event[]
+  auditLogs  AuditLog[]
+
+  @@map("servers")
+}
+
+// ───── ServerRole ─────
+/// A Discord role granted admin or host permissions within a server.
+model ServerRole {
+  /// Internal CUID — stable even if Discord role is deleted.
+  id              String          @id @default(cuid())
+
+  /// The server this role belongs to.
+  discordServerId String          @map("discord_server_id")
+
+  /// The Discord role snowflake ID.
+  discordRoleId   String          @map("discord_role_id")
+
+  /// Permission level granted to this role.
+  permissionLevel PermissionLevel @map("permission_level")
+
+  server Server @relation(fields: [discordServerId], references: [discordServerId])
+
+  @@unique([discordServerId, discordRoleId])
+
+  @@map("server_roles")
+}
+
+// ───── Event ─────
+/// A community event created within a server.
+model Event {
+  /// Internal CUID — primary key, survives Discord message deletion.
+  id               String      @id @default(cuid())
+
+  /// The server this event belongs to.
+  discordServerId  String      @map("discord_server_id")
+
+  /// The Discord message ID of the posted event embed. Nullable until posted.
+  discordMessageId String?     @map("discord_message_id")
+
+  /// The Discord channel ID where the event is posted.
+  channelId        String      @map("channel_id")
+
+  /// Discord user ID of the host who created the event.
+  createdBy        String      @map("created_by")
+
+  /// Display title of the event.
+  title            String
+
+  /// Optional description shown on the event embed.
+  description      String?
+
+  /// When the event starts.
+  startTime        DateTime    @map("start_time")
+
+  /// When the event ends.
+  endTime          DateTime    @map("end_time")
+
+  /// Duration in minutes, derived from start/end but stored for convenience.
+  durationMinutes  Int         @map("duration_minutes")
+
+  /// Maximum number of attendees across all RSVP options. Null means unlimited.
+  maxAttendees     Int?        @map("max_attendees")
+
+  /// Whether a waitlist is enabled when capacity is reached.
+  waitlistEnabled  Boolean     @default(false) @map("waitlist_enabled")
+
+  /// Maximum number of waitlist spots. Null means unlimited.
+  maxWaitlist      Int?        @map("max_waitlist")
+
+  /// Current lifecycle status of the event.
+  status           EventStatus @default(draft)
+
+  /// Timestamp of soft delete. Null if not deleted.
+  deletedAt        DateTime?   @map("deleted_at")
+
+  /// Timestamp of when this record was created.
+  createdAt        DateTime    @default(now()) @map("created_at")
+
+  /// Timestamp of the last update to this record.
+  updatedAt        DateTime    @updatedAt @map("updated_at")
+
+  server      Server            @relation(fields: [discordServerId], references: [discordServerId])
+  recurrence  EventRecurrence?
+  rsvpOptions RsvpOption[]
+  signups     Signup[]
+  alerts      EventAlert[]
+
+  @@index([discordServerId])
+
+  @@map("events")
+}
+
+// ───── EventRecurrence ─────
+/// Recurrence configuration for a repeating event.
+model EventRecurrence {
+  /// Internal CUID.
+  id             String               @id @default(cuid())
+
+  /// The event this recurrence belongs to.
+  eventId        String               @unique @map("event_id")
+
+  /// How often the event repeats.
+  frequency      RecurrenceFrequency
+
+  /// Custom interval value, used when frequency is `custom`.
+  customInterval Int?                 @map("custom_interval")
+
+  /// Unit for custom interval (days, weeks, months).
+  customUnit     RecurrenceUnit?      @map("custom_unit")
+
+  /// When the recurrence ends. Null means it repeats indefinitely.
+  endsAt         DateTime?            @map("ends_at")
+
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@map("event_recurrence")
+}
+
+// ───── RsvpOption ─────
+/// A named RSVP slot on an event (e.g. "Fish", "Rice", or the default sign-up).
+model RsvpOption {
+  /// Internal CUID.
+  id       String  @id @default(cuid())
+
+  /// The event this option belongs to.
+  eventId  String  @map("event_id")
+
+  /// Display label for this RSVP option.
+  label    String
+
+  /// Display order position.
+  position Int
+
+  /// Maximum slots for this option. Null means unlimited.
+  maxSlots Int?    @map("max_slots")
+
+  event   Event    @relation(fields: [eventId], references: [id])
+  signups Signup[]
+
+  @@map("rsvp_options")
+}
+
+// ───── Signup ─────
+/// A user's signup for a specific RSVP option on an event.
+model Signup {
+  /// Internal CUID.
+  id            String   @id @default(cuid())
+
+  /// The event this signup belongs to.
+  eventId       String   @map("event_id")
+
+  /// The RSVP option the user signed up for.
+  rsvpOptionId  String   @map("rsvp_option_id")
+
+  /// The Discord user snowflake ID.
+  discordUserId String   @map("discord_user_id")
+
+  /// Whether this signup is on the waitlist.
+  isWaitlisted  Boolean  @default(false) @map("is_waitlisted")
+
+  /// Timestamp of when the user signed up.
+  signedUpAt    DateTime @default(now()) @map("signed_up_at")
+
+  event      Event      @relation(fields: [eventId], references: [id])
+  rsvpOption RsvpOption @relation(fields: [rsvpOptionId], references: [id])
+
+  @@unique([eventId, rsvpOptionId, discordUserId])
+  @@index([discordUserId])
+
+  @@map("signups")
+}
+
+// ───── EventAlert ─────
+/// A scheduled alert/reminder for an event.
+model EventAlert {
+  /// Internal CUID.
+  id         String   @id @default(cuid())
+
+  /// The event this alert belongs to.
+  eventId    String   @map("event_id")
+
+  /// When this alert should be sent.
+  sendAt     DateTime @map("send_at")
+
+  /// Discord role ID to ping. Null means no role ping.
+  pingRoleId String?  @map("ping_role_id")
+
+  /// Whether this alert has already been sent.
+  sent       Boolean  @default(false)
+
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@map("event_alerts")
+}
+
+// ───── User ─────
+/// A user record, created lazily only when preferences deviate from defaults.
+model User {
+  /// The Discord user snowflake ID — serves as the primary key.
+  discordUserId     String    @id @map("discord_user_id")
+
+  /// Whether the user has consented to receiving DM reminders.
+  dmConsent         Boolean   @default(false) @map("dm_consent")
+
+  /// When DM consent was given. Null if not yet given.
+  dmConsentGivenAt  DateTime? @map("dm_consent_given_at")
+
+  /// Dashboard theme preference. Null means default theme.
+  theme             String?
+
+  /// Dashboard colour scheme preference.
+  colorScheme       ColorScheme @default(system) @map("color_scheme")
+
+  /// Timestamp of the user's last activity, used for data retention checks.
+  lastActiveAt      DateTime  @map("last_active_at")
+
+  /// Timestamp of when this record was created.
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  reminderPresets UserReminderPreset[]
+
+  @@map("users")
+}
+
+// ───── UserReminderPreset ─────
+/// A saved reminder timing preset belonging to a user.
+model UserReminderPreset {
+  /// Internal CUID.
+  id            String  @id @default(cuid())
+
+  /// The user this preset belongs to.
+  discordUserId String  @map("discord_user_id")
+
+  /// Weeks component of the reminder offset.
+  weeks         Int?
+
+  /// Days component of the reminder offset.
+  days          Int?
+
+  /// Hours component of the reminder offset.
+  hours         Int?
+
+  /// Minutes component of the reminder offset.
+  minutes       Int?
+
+  /// Timestamp of when this preset was created.
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [discordUserId], references: [discordUserId])
+
+  @@map("user_reminder_presets")
+}
+
+// ───── AuditLog ─────
+/// An audit log entry recording an admin or mod action.
+model AuditLog {
+  /// Internal CUID.
+  id                String      @id @default(cuid())
+
+  /// The server this action occurred in.
+  discordServerId   String      @map("discord_server_id")
+
+  /// Discord user ID of the person who performed the action.
+  actionBy          String      @map("action_by")
+
+  /// Username of the person at the time of the action, stored for readability.
+  actionByUsername  String      @map("action_by_username")
+
+  /// The type of action performed.
+  action            AuditAction
+
+  /// ID of the affected entity (event, role, signup, etc). Null if not applicable.
+  targetId          String?     @map("target_id")
+
+  /// Timestamp of when this action occurred.
+  createdAt         DateTime    @default(now()) @map("created_at")
+
+  server Server @relation(fields: [discordServerId], references: [discordServerId])
+
+  @@index([discordServerId])
+
+  @@map("audit_logs")
 }
