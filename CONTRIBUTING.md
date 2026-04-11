@@ -13,13 +13,28 @@ Please read this document before opening issues or pull requests.
 - Docker and Docker Compose (for running the database locally)
 - A Discord application and bot token for local testing
 
+### Windows Users
+
+If you see garbled characters in your terminal output, fix UTF-8 encoding in PowerShell permanently:
+
+```powershell
+New-Item -Path $PROFILE -ItemType File -Force
+notepad $PROFILE
+```
+
+Add this line, save, and restart PowerShell:
+
+```powershell
+[console]::InputEncoding = [console]::OutputEncoding = New-Object System.Text.UTF8Encoding
+```
+
 ## Getting Started
 
 1. Fork the repository
 2. Clone your fork locally
 3. Install dependencies in each workspace:
    ```bash
-   cd bot && npm install && cd ../db && npm install && cd ../dashboard && npm install && cd ..
+   cd bot && npm install && cd ../api && npm install && cd ../db && npm install && cd ../dashboard && npm install && cd ..
    ```
 4. Generate the Prisma client:
    ```bash
@@ -29,6 +44,10 @@ Please read this document before opening issues or pull requests.
 6. Start the database:
    ```bash
    docker compose up db
+   ```
+7. Start the API (separate terminal):
+   ```bash
+   cd api && npm run dev
    ```
 
 ## Making Changes

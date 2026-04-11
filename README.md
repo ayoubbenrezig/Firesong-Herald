@@ -9,6 +9,23 @@ A Discord bot for event management — signups, RSVPs, reminders, and a live web
 - PostgreSQL 18+ (or Docker Compose)
 - Discord bot token and Client ID
 
+### Windows Users
+
+If you are on Windows and see garbled characters in your terminal output, run the following in PowerShell to fix UTF-8 encoding:
+
+```powershell
+[console]::InputEncoding = [console]::OutputEncoding = New-Object System.Text.UTF8Encoding
+```
+
+To make this permanent, add the line to your PowerShell profile:
+
+```powershell
+New-Item -Path $PROFILE -ItemType File -Force
+notepad $PROFILE
+```
+
+Paste the line above, save, and restart PowerShell.
+
 ### Development Setup
 
 1. Clone the repository
@@ -26,11 +43,14 @@ POSTGRES_PASSWORD=password
 POSTGRES_DB=firesong_db
 POSTGRES_PORT=5432
 DATABASE_URL=postgresql://postgres:password@db:5432/firesong_db
+API_PORT=3001
+API_HOST=0.0.0.0
+DASHBOARD_URL=http://localhost:5173
 ```
 
 3. Install dependencies
 ```bash
-cd bot && npm install && cd ../db && npm install && cd ../dashboard && npm install && cd ..
+cd bot && npm install && cd ../api && npm install && cd ../db && npm install && cd ../dashboard && npm install && cd ..
 ```
 
 4. Generate the Prisma client
@@ -40,11 +60,16 @@ cd db && npx prisma generate && cd ..
 
 5. Start the stack
 ```bash
-# Full stack (database + bot)
-docker compose --profile bot up
-
 # Database only
 docker compose up db
+
+# Full stack (database + bot)
+docker compose --profile bot up
+```
+
+6. Start the API (separate terminal)
+```bash
+cd api && npm run dev
 ```
 
 ## Alpha Features
