@@ -4,6 +4,7 @@
   "engines": {
     "node": ">=24.0.0"
   },
+  "type": "module",
   "description": "",
   "main": "index.js",
   "scripts": {
