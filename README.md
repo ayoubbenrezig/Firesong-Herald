@@ -30,10 +30,15 @@ DATABASE_URL=postgresql://postgres:password@db:5432/firesong_db
 
 3. Install dependencies
 ```bash
-cd bot && npm install && cd ../dashboard && npm install && cd ..
+cd bot && npm install && cd ../db && npm install && cd ../dashboard && npm install && cd ..
 ```
 
-4. Start the stack
+4. Generate the Prisma client
+```bash
+cd db && npx prisma generate && cd ..
+```
+
+5. Start the stack
 ```bash
 # Full stack (database + bot)
 docker compose --profile bot up

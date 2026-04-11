@@ -2,6 +2,9 @@
   "name": "firesong-herald",
   "version": "0.1.0-alpha",
   "private": true,
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "type": "module",
   "scripts": {
     "dev": "tsx src/index.ts",

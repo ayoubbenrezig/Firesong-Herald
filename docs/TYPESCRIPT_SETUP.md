@@ -1,124 +1,139 @@
-# TypeScript Migration Guide
+# TypeScript Setup Guide
 
-## What Changed?
+## Overview
 
-The project has been migrated from JavaScript to **TypeScript throughout**. This affects both the bot and dashboard.
+The project uses TypeScript throughout — bot, API, and dashboard. This document covers the setup, conventions, and key decisions made across the stack.
 
-## What This Means For You
+---
 
-### Development Workflow
+## Workspaces
 
-**Before (JavaScript):**
-```bash
-node bot/index.js
-```
+| Workspace | Path | Runtime |
+|---|---|---|
+| Bot | `bot/` | Node.js + tsx (dev), tsc (prod) |
+| Database | `db/` | Prisma CLI only |
+| Dashboard | `dashboard/` | SvelteKit + Vite |
 
-**After (TypeScript):**
-```bash
-# Development with hot reload
-npm run dev  (in bot/ or dashboard/)
+Each workspace has its own `package.json`, `tsconfig.json`, and `node_modules`.
 
-# Production
-npm run build
-npm start
-```
+---
 
-### File Structure
-
-- **Bot:** Code now lives in `bot/src/` as `.ts` files instead of root `index.js`
-- **Dashboard:** Code in `dashboard/src/` with `.ts` and `.svelte` files
-- **Compiled Output:** TypeScript compiles to `dist/` directory (git-ignored)
-
-### Type Safety Across the Project
-
-- **Prisma Types:** Auto-generated from schema, available in both bot and dashboard
-- **API Communication:** Types shared between bot and dashboard via Prisma client
-- **Discord.js Types:** Built-in types from `discord.js` package
-- **Environment Variables:** Type-check with `dotenv`
-
-### Development Tools
+## Development Workflow
 
 **Bot:**
-- `tsc` - TypeScript compiler
-- `tsx` - Run TypeScript directly for development
-- `.ts` files only
+```bash
+cd bot
+npm run dev    # runs tsx src/index.ts with hot reload
+npm run build  # compiles to dist/
+npm start      # runs dist/index.js
+npm test       # runs Vitest
+```
 
 **Dashboard:**
-- `vite` - Build tool and dev server
-- `@sveltejs/vite-plugin-svelte` - Svelte support
-- `.ts` and `.svelte` files
-- `vite.config.ts` - Vite configuration
+```bash
+cd dashboard
+npm run dev    # Vite dev server
+npm run build  # compiles to static assets
+```
 
-### Configuration Files Added
+---
 
-- **`bot/tsconfig.json`** - Strict TypeScript settings for Node.js
-- **`dashboard/tsconfig.json`** - Browser + DOM settings for Svelte
-- **`dashboard/tsconfig.node.json`** - Vite config type checking
-- **`dashboard/vite.config.ts`** - Build and dev server config
+## File Structure
 
-### Package.json Changes
+```
+bot/
+  src/
+    commands/       # slash commands by category
+    handlers/       # Discord.js event and command loaders
+    services/       # database and business logic
+    utils/          # shared utilities (logger, etc.)
+    index.ts        # entry point
+  tests/            # Vitest unit tests
+  tsconfig.json
+  vitest.config.ts
 
-Both services now include:
-- `typescript` and `@types/node` in `devDependencies`
-- Build/dev scripts
-- Proper version numbering (`0.1.0-alpha`)
+db/
+  prisma/
+    schema.prisma   # database schema
+  generated/
+    prisma/         # auto-generated Prisma client
+  prisma.config.ts  # Prisma 7 config (datasource URL)
 
-### Build & Run in Docker
+dashboard/
+  src/
+    ...             # SvelteKit pages and components
+```
 
-Dockerfiles have been updated:
-- **Bot:** `npm run build` → compiles TS → runs `dist/index.js`
-- **Dashboard:** Multi-stage build (compile TypeScript, serve built assets)
+---
 
-## Why TypeScript?
+## TypeScript Configuration
 
-1. **Type Safety** - Catch errors at development time, not runtime
-2. **IntelliSense** - Better autocomplete and docs in your editor
-3. **Refactoring Confidence** - Change code without breaking things silently
-4. **Prisma Integration** - Auto-generated types from schema stay in sync
-5. **Shared Types** - Bot and dashboard can import types from each other
+Both bot and dashboard use strict mode:
 
-## Next Steps
+- No implicit `any`
+- No unused variables or parameters
+- Null/undefined safety enforced
+- `moduleResolution: bundler` — works with tsx and Vite without requiring file extensions on imports
 
-1. **Install dependencies:**
-   ```bash
-   cd bot && npm install && cd ../dashboard && npm install && cd ..
-   ```
+`bot/tsconfig.json` sets `rootDir: ..` to allow imports from `db/generated/prisma/` across workspace boundaries.
 
-2. **Start developing:**
-   ```bash
-   # Bot (development)
-   cd bot && npm run dev
+---
 
-   # Dashboard (development, in another terminal)
-   cd dashboard && npm run dev
-   ```
+## Prisma Integration
 
-3. **Build for production:**
-   ```bash
-   npm run build  (in each service directory)
-   ```
+Prisma 7 generates the client to a custom output path. Import from the generated path — not from `@prisma/client`:
 
-## Strict Mode Enabled
+```typescript
+import { PrismaClient } from '../../db/generated/prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 
-TypeScript is in **strict mode** in both services. This means:
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+export const prisma = new PrismaClient({ adapter });
+```
+
+Prisma 7 requires a driver adapter — `PrismaPg` is used for PostgreSQL. Calling `new PrismaClient()` without an adapter will throw at runtime.
+
+After any schema change, regenerate the client:
+
+```bash
+cd db && npx prisma generate
+```
+
+---
+
+## Logging
+
+All logging goes through the centralised Pino logger — never use `console.*` directly:
+
+```typescript
+import { logger } from '../utils/logger';
+
+logger.info('Bot started');
+logger.error({ err: error }, 'Failed to create event');
+```
+
+In development, logs are pretty-printed with colour. In production, logs are compact JSON.
+
+---
+
+## Testing
+
+Tests use Vitest with `vitest-mock-extended` for mocking Prisma. The config lives at `bot/vitest.config.ts` and tests live in `bot/src/tests/`.
+
+Run tests:
+```bash
+cd bot && npm test
+```
+
+---
+
+## Strict Mode
+
+TypeScript strict mode is enabled in all workspaces. This means:
+
 - No implicit `any` types
 - No unused variables or parameters
 - Null/undefined safety enforced
-- Function return types must be explicit
+- Function return types checked
 
-This is intentional — it catches bugs early and makes the codebase more maintainable.
-
-## Prisma Schema Integration
-
-When you create `prisma/schema.prisma`, both services will have access to Prisma-generated types:
-
-```typescript
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
-const event = await prisma.event.findUnique({...});
-// event is fully typed automatically
-```
-
-No manual type definitions needed — the schema generates them for you.
-
+This is intentional — it catches bugs early and keeps the codebase maintainable.

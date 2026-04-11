@@ -8,18 +8,28 @@ Please read this document before opening issues or pull requests.
 
 ## Prerequisites
 
-> This list will be expanded as the stack is finalised.
-
-- Node.js (version TBD)
+- Node.js 24+
 - npm
+- Docker and Docker Compose (for running the database locally)
 - A Discord application and bot token for local testing
 
 ## Getting Started
 
 1. Fork the repository
 2. Clone your fork locally
-3. Install dependencies in the relevant workspace (e.g. `bot/`, `api/`, `dashboard/`)
-4. Copy `.env.example` to `.env` and fill in your local values
+3. Install dependencies in each workspace:
+   ```bash
+   cd bot && npm install && cd ../db && npm install && cd ../dashboard && npm install && cd ..
+   ```
+4. Generate the Prisma client:
+   ```bash
+   cd db && npx prisma generate && cd ..
+   ```
+5. Copy `.env.example` to `.env` and fill in your local values
+6. Start the database:
+   ```bash
+   docker compose up db
+   ```
 
 ## Making Changes
 

@@ -17,6 +17,7 @@
 | Frontend | SvelteKit | Compiles to vanilla JS, no runtime overhead, file-based routing |
 | Language | TypeScript throughout | Types everywhere, catches bugs at write time, zero runtime cost |
 | Real-time | WebSockets inside Fastify | Live sync between Discord and dashboard |
+| Logging | Pino | Structured JSON logging, low overhead, built into Fastify |
 
 ---
 
@@ -127,7 +128,7 @@ Both write to the same DB. Both sync back to the Discord embed instantly via Web
 - Fastify issues a JWT session token, stored in browser
 - No passwords, no separate account system — Discord IS the identity layer
 - Owner ID checked live against Discord API, never stored
-- Admin and mod role IDs stored in `server_settings`, checked against user's Discord roles on every request
+- Admin and mod role IDs stored in `server_roles`, checked against user's Discord roles on every request
 
 ---
 
@@ -135,42 +136,51 @@ Both write to the same DB. Both sync back to the Discord embed instantly via Web
 
 ```
 owner   → checked live via Discord API
-admin   → has the designated admin_role_id
-mod     → has the designated mod_role_id
+admin   → has the designated admin role ID in server_roles
+host    → has the designated host role ID in server_roles
 member  → everyone else, default, no row needed
 ```
 
-Per server, completely isolated by `server_id`. Owner designates which Discord role IDs map to admin and mod. Dynamic — changes any time.
+Per server, completely isolated by `discord_server_id`. Owner designates which Discord role IDs map to admin and host. Dynamic — changes any time.
 
 ---
 
 ## Database Structure
 
-One DB, isolated by `server_id`. No cross-server data leakage ever.
+One DB, isolated by `discord_server_id`. No cross-server data leakage ever.
 
-```
-servers           → server_id, discord_server_id, name
-server_settings   → server_id, admin_role_id, mod_role_id, missing_permissions
-events            → id, server_id, name, date, ...
-signups           → event_id, discord_user_id, expires_at
-```
+| Table | Purpose |
+|---|---|
+| `servers` | Discord servers that have added the bot |
+| `server_roles` | Role IDs granted admin or host permissions per server |
+| `events` | Community events with full lifecycle management |
+| `event_recurrence` | Recurrence config for repeating events |
+| `rsvp_options` | Named signup slots per event |
+| `signups` | User signups for a specific RSVP option |
+| `event_alerts` | Scheduled reminders for events |
+| `calendars` | Scheduled calendar posts per server |
+| `users` | Lazy-created user records for preference storage |
+| `user_reminder_presets` | Saved reminder timing presets per user |
+| `audit_logs` | Admin and mod action history |
 
 ---
 
 ## Permission Handling
 
-On bot join and on dashboard load — fetch bot's current permissions, compare against required list, map to human-readable descriptions, store in `server_settings`, display on dashboard with clear explanation of what breaks without each permission. WebSocket pushes updates instantly if something changes.
+On bot join and on dashboard load — fetch bot's current permissions, compare against required list, map to human-readable descriptions, display on dashboard with clear explanation of what breaks without each permission. WebSocket pushes updates instantly if something changes.
 
 ---
 
 ## Build Order
 
-1. DB schema in Prisma
-2. Discord OAuth2 auth
-3. Permission fetch and mapping
-4. Events and signups API
-5. WebSocket layer
-6. SvelteKit dashboard on top
+1. ✅ DB schema in Prisma
+2. ✅ Event service (store and retrieve events)
+3. Discord OAuth2 auth
+4. Event creation slash command
+5. RSVP slash commands
+6. Audit logging
+7. WebSocket layer
+8. SvelteKit dashboard on top
 
 ---
 
