@@ -1,31 +1,219 @@
+/* ============================================================================
+ * LAYOUT STYLES
+ * ============================================================================
+ * Global component styles for Firesong Herald dashboard.
+ */
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * IMPORTS
+ * ─────────────────────────────────────────────────────────────────────────
+ */
+
 @import 'tailwindcss';
 @import '@skeletonlabs/skeleton-svelte';
 @import '@skeletonlabs/skeleton';
 @import '@skeletonlabs/skeleton/themes/catppuccin';
-@import '@skeletonlabs/skeleton/themes/modern';
-@import '@skeletonlabs/skeleton/themes/vox';
-@import '@skeletonlabs/skeleton/themes/nosh';
-@import '@skeletonlabs/skeleton/themes/rose';
-@import '@skeletonlabs/skeleton/themes/pine';
-@import '@skeletonlabs/skeleton/themes/vintage';
+@import '@skeletonlabs/skeleton/themes/cerberus';
+@import '@skeletonlabs/skeleton/themes/concord';
+@import '@skeletonlabs/skeleton/themes/crimson';
 @import '@skeletonlabs/skeleton/themes/fennec';
+@import '@skeletonlabs/skeleton/themes/hamlindigo';
+@import '@skeletonlabs/skeleton/themes/legacy';
+@import '@skeletonlabs/skeleton/themes/mint';
+@import '@skeletonlabs/skeleton/themes/modern';
+@import '@skeletonlabs/skeleton/themes/mona';
+@import '@skeletonlabs/skeleton/themes/nosh';
+@import '@skeletonlabs/skeleton/themes/nouveau';
+@import '@skeletonlabs/skeleton/themes/pine';
+@import '@skeletonlabs/skeleton/themes/reign';
+@import '@skeletonlabs/skeleton/themes/rocket';
+@import '@skeletonlabs/skeleton/themes/rose';
+@import '@skeletonlabs/skeleton/themes/sahara';
+@import '@skeletonlabs/skeleton/themes/seafoam';
+@import '@skeletonlabs/skeleton/themes/terminus';
+@import '@skeletonlabs/skeleton/themes/vintage';
+@import '@skeletonlabs/skeleton/themes/vox';
+@import '@skeletonlabs/skeleton/themes/wintry';
 
 @plugin '@tailwindcss/typography';
 
+/* ─────────────────────────────────────────────────────────────────────────
+ * CUSTOM VARIANTS
+ * ─────────────────────────────────────────────────────────────────────────
+ */
+
 @custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));
 
-/* Sidebar separation */
+/* ─────────────────────────────────────────────────────────────────────────
+ * NAVIGATION
+ * ─────────────────────────────────────────────────────────────────────────
+ */
+
+.nav-polished {
+    margin-top: 1rem;
+    margin-left: 1rem;
+    margin-right: 1rem;
+    border-radius: 1rem;
+    background-color: color-mix(in oklab, var(--color-surface-950) 60%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid color-mix(in oklab, var(--color-surface-500) 15%, transparent);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.nav-polished:hover {
+    border-color: color-mix(in oklab, var(--color-surface-500) 30%, transparent);
+}
+
 nav {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    width: 100%;
+    max-width: 64rem;
     border-right: 1px solid color-mix(in oklab, var(--color-surface-500) 20%, transparent);
 }
-/* Theme selector buttons — unselected state */
+
+.nav-link {
+    @apply transition-all duration-200 opacity-70 font-medium;
+}
+
+.nav-link:hover {
+    @apply opacity-100;
+    color: var(--color-primary-400);
+    text-shadow: 0 0 8px color-mix(in oklab, var(--color-primary-500) 30%, transparent);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * BUTTONS
+ * ─────────────────────────────────────────────────────────────────────────
+ */
+
 .btn.preset-outlined-surface-500 {
-    border-color: color-mix(in oklab, var(--color-surface-500) 40%, transparent);
-    box-shadow: 0 2px 8px color-mix(in oklab, black 20%, transparent);
-    transition: border-color 0.2s, box-shadow 0.2s;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    transition: all 0.2s ease;
 }
 
 .btn.preset-outlined-surface-500:hover {
-    border-color: color-mix(in oklab, var(--color-primary-500) 60%, transparent);
-    box-shadow: 0 4px 16px color-mix(in oklab, var(--color-primary-500) 12%, transparent);
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+}
+
+.btn.preset-filled-primary-500 {
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
+    0 4px 12px rgba(var(--color-primary-500) / 0.3);
+}
+
+.btn.preset-filled-primary-500:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * CARDS
+ * ─────────────────────────────────────────────────────────────────────────
+ */
+
+.glass-card {
+    background-color: color-mix(in oklab, var(--color-surface-500) 5%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid color-mix(in oklab, var(--color-surface-500) 15%, transparent);
+    border-radius: 0.75rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.glass-card:hover {
+    transform: translateY(-4px);
+    box-shadow:
+            inset 0 1px 0 0 rgba(255, 255, 255, 0.1),
+            0 12px 24px -10px rgba(0, 0, 0, 0.5);
+    border-color: color-mix(in oklab, var(--color-surface-500) 40%, transparent);
+}
+
+.glass-card h2 {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    letter-spacing: -0.01em;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * TYPOGRAPHY
+ * ─────────────────────────────────────────────────────────────────────────
+ */
+
+h1 {
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    background: linear-gradient(to bottom, #ffffff, color-mix(in oklab, var(--color-surface-300) 80%, white));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+h2 {
+    letter-spacing: -0.01em;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * BACKGROUNDS & LAYOUT
+ * ─────────────────────────────────────────────────────────────────────────
+ */
+
+.min-h-screen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-surface-50);
+    background-image:
+            radial-gradient(at 0% 0%, color-mix(in oklab, var(--color-primary-500) 10%, transparent) 0px, transparent 50%),
+            radial-gradient(at 100% 0%, color-mix(in oklab, var(--color-secondary-500) 10%, transparent) 0px, transparent 50%);
+    background-attachment: fixed;
+    background-size: cover;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * UTILITY CLASSES
+ * ─────────────────────────────────────────────────────────────────────────
+ */
+
+.brand-text {
+    @apply font-black tracking-tighter text-xl;
+    background: linear-gradient(135deg, var(--color-primary-300) 0%, var(--color-secondary-300) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 16px color-mix(in oklab, var(--color-primary-400) 60%, transparent));
+    text-shadow: none;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * DARK MODE OVERRIDES
+ * ─────────────────────────────────────────────────────────────────────────
+ */
+
+[data-mode="dark"] .min-h-screen {
+    background-color: var(--color-surface-950);
+    background-image:
+            radial-gradient(at 0% 0%, color-mix(in oklab, var(--color-primary-500) 8%, transparent) 0px, transparent 50%),
+            radial-gradient(at 100% 0%, color-mix(in oklab, var(--color-secondary-500) 8%, transparent) 0px, transparent 50%);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * LIGHT MODE OVERRIDES
+ * ─────────────────────────────────────────────────────────────────────────
+ */
+
+[data-mode="light"] h1 {
+    background: none;
+    -webkit-background-clip: unset;
+    -webkit-text-fill-color: var(--color-surface-950);
+}
+
+[data-mode="light"] .brand-text {
+    background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-secondary-500) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: none;
 }

@@ -34,17 +34,17 @@
     }
 </script>
 
-<div class="p-6 space-y-6">
+<div class="p-6 space-y-4">
     <h2 class="h2">Theme</h2>
 
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
         {#each THEMES as theme (theme.id)}
             <button
-                    class="btn preset-outlined-surface-500 flex flex-col items-center gap-1 p-3 {selectedTheme === theme.id ? 'preset-filled-primary-500' : ''}"
+                    class="btn preset-outlined-surface-500 flex flex-col items-center gap-1 p-2 text-xs {selectedTheme === theme.id ? 'preset-filled-primary-500' : ''}"
                     onclick={() => handlePreview(theme.id)}
             >
-                <span class="text-2xl">{theme.emoji}</span>
-                <span class="text-sm">{theme.label}</span>
+                <span class="text-lg">{theme.emoji}</span>
+                <span class="truncate w-full text-center">{theme.label}</span>
             </button>
         {/each}
     </div>
