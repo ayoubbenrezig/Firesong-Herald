@@ -1,3 +1,13 @@
+/* ============================================================================
+ * LAYOUT STYLES
+ * ============================================================================
+ * Global component styles for Firesong Herald dashboard.
+ */
+/* ─────────────────────────────────────────────────────────────────────────
+ * IMPORTS
+ * ─────────────────────────────────────────────────────────────────────────
+ */
+
 @import 'tailwindcss';
 @import '@skeletonlabs/skeleton-svelte';
 @import '@skeletonlabs/skeleton';
@@ -12,20 +22,176 @@
 
 @plugin '@tailwindcss/typography';
 
+/* ─────────────────────────────────────────────────────────────────────────
+ * CUSTOM VARIANTS
+ * ─────────────────────────────────────────────────────────────────────────
+ */
+
 @custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));
 
-/* Sidebar separation */
+/* ─────────────────────────────────────────────────────────────────────────
+ * NAVIGATION
+ * ─────────────────────────────────────────────────────────────────────────
+ */
+
+/* The Floating Nav Style */
+.nav-polished {
+    margin-top: 1rem;
+    margin-left: 1rem;
+    margin-right: 1rem;
+    border-radius: 1rem;
+    background-color: color-mix(in oklab, var(--color-surface-950) 60%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid color-mix(in oklab, var(--color-surface-500) 15%, transparent);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.nav-polished:hover {
+    border-color: color-mix(in oklab, var(--color-surface-500) 30%, transparent);
+}
+
+/* Keeps the nav centred regardless of screen size */
 nav {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    width: 100%;
+    max-width: 64rem;
     border-right: 1px solid color-mix(in oklab, var(--color-surface-500) 20%, transparent);
 }
+
+/* Navigation link styling with hover effects */
+.nav-link {
+    @apply transition-all duration-200 opacity-70 font-medium;
+}
+
+.nav-link:hover {
+    @apply opacity-100;
+    color: var(--color-primary-400);
+    text-shadow: 0 0 8px color-mix(in oklab, var(--color-primary-500) 30%, transparent);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * BUTTONS
+ * ─────────────────────────────────────────────────────────────────────────
+ */
+
 /* Theme selector buttons — unselected state */
 .btn.preset-outlined-surface-500 {
-    border-color: color-mix(in oklab, var(--color-surface-500) 40%, transparent);
-    box-shadow: 0 2px 8px color-mix(in oklab, black 20%, transparent);
-    transition: border-color 0.2s, box-shadow 0.2s;
+    background: rgba(255, 255, 255, 0.03); /* Fills the "hollow" look */
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    transition: all 0.2s ease;
 }
 
 .btn.preset-outlined-surface-500:hover {
-    border-color: color-mix(in oklab, var(--color-primary-500) 60%, transparent);
-    box-shadow: 0 4px 16px color-mix(in oklab, var(--color-primary-500) 12%, transparent);
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+}
+
+/* Primary filled button with enhanced polish */
+.btn.preset-filled-primary-500 {
+    position: relative;
+    overflow: hidden;
+    /* Subtle 'shine' on the top edge */
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
+                0 4px 12px rgba(var(--color-primary-500) / 0.3);
+}
+
+.btn.preset-filled-primary-500:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * CARDS
+ * ─────────────────────────────────────────────────────────────────────────
+ */
+
+/* The "Glass" effect for any preset */
+.glass-card {
+    /* Slight background tint */
+    background-color: color-mix(in oklab, var(--color-surface-500) 5%, transparent);
+
+    /* The blur effect */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    /* A border that isn't just a solid line */
+    border: 1px solid color-mix(in oklab, var(--color-surface-500) 15%, transparent);
+
+    /* Rounded corners to match your original design */
+    border-radius: 0.75rem; /* 12px */
+
+    /* Smooth movement when hovering */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.glass-card:hover {
+    /* Lifts the card up 4 pixels */
+    transform: translateY(-4px);
+    /* Adds a soft glow using your theme's surface colour */
+    box-shadow:
+            inset 0 1px 0 0 rgba(255, 255, 255, 0.1),
+            0 12px 24px -10px rgba(0, 0, 0, 0.5);
+    /* Makes the border pop a little more on hover */
+    border-color: color-mix(in oklab, var(--color-surface-500) 40%, transparent);
+}
+
+.glass-card h2 {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    letter-spacing: -0.01em;
+    colour: var(--color-primary-300); /* Adds a hint of colour to feature titles */
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * TYPOGRAPHY
+ * ─────────────────────────────────────────────────────────────────────────
+ */
+
+/* Slick Heading Polish with gradient effect */
+h1 {
+    letter-spacing: -0.03em; /* Tighter for a modern look */
+    line-height: 1.1;
+    background: linear-gradient(to bottom, #ffffff, color-mix(in oklab, var(--color-surface-300) 80%, white));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+h2 {
+    letter-spacing: -0.01em;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * BACKGROUNDS & LAYOUT
+ * ─────────────────────────────────────────────────────────────────────────
+ */
+
+/* Apply subtle radial gradient mesh to the main container */
+.min-h-screen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    /* This makes the background follow the theme (Light or Dark) */
+    background-color: var(--color-surface-950);
+    background-image:
+            radial-gradient(at 0% 0%, color-mix(in oklab, var(--color-primary-500) 10%, transparent) 0px, transparent 50%),
+            radial-gradient(at 100% 0%, color-mix(in oklab, var(--color-secondary-500) 10%, transparent) 0px, transparent 50%);
+    background-attachment: fixed;
+    background-size: cover;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * UTILITY CLASSES
+ * ─────────────────────────────────────────────────────────────────────────
+ */
+
+.brand-text {
+    @apply font-black tracking-tighter; /* Heavier and tighter */
+    background: linear-gradient(135deg, var(--color-primary-400), var(--color-secondary-500));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    /* Adds a soft themed glow so it pops off the background */
+    filter: drop-shadow(0 0 10px color-mix(in oklab, var(--color-primary-500) 20%, transparent));
 }

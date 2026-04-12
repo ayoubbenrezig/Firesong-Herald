@@ -40,24 +40,26 @@
     <meta name="description" content="A Discord bot for community event management — signups, RSVPs, reminders, and a live web dashboard." />
 </svelte:head>
 
-<div class="min-h-screen bg-surface-50 dark:bg-surface-950 text-surface-900 dark:text-surface-50">
+<div class="min-h-screen flex flex-col">
 
     <!-- Nav -->
-    <nav class="border-b border-surface-200 dark:border-surface-800 px-6 py-4">
-        <div class="max-w-5xl mx-auto flex items-center justify-between">
-            <span class="text-lg font-semibold">Firesong Herald</span>
-            <div class="flex items-center gap-4 text-sm">
-                <a href="https://github.com/ayoubbenrezig/Firesong-Herald" target="_blank" rel="noopener noreferrer" class="hover:underline">GitHub</a>
-                <a href="/privacy" class="hover:underline">Privacy</a>
-                <a href="/tos" class="hover:underline">Terms</a>
-                <button onclick={handleToggle} class="cursor-pointer p-1.5 rounded-md opacity-70 hover:opacity-100 hover:bg-surface-200 dark:hover:bg-surface-800 transition-all" aria-label="Toggle dark mode">
+    <nav class="nav-polished px-6 py-4 sticky top-4 z-50 max-w-5xl mx-auto">
+        <div class="mx-auto flex items-center justify-between">
+            <span class="brand-text text-lg font-bold">Firesong Herald</span>
+            <div class="flex items-center gap-6 text-sm">
+                <a href="https://github.com/ayoubbenrezig/Firesong-Herald" target="_blank" rel="noopener noreferrer" class="opacity-70 hover:opacity-100 transition-opacity">GitHub</a>
+                <a href="/privacy" class="opacity-70 hover:opacity-100 transition-opacity">Privacy</a>
+                <a href="/tos" class="opacity-70 hover:opacity-100 transition-opacity">Terms</a>
+
+                <button onclick={handleToggle} class="cursor-pointer p-1.5 rounded-full hover:bg-white/10 transition-colors" aria-label="Toggle dark mode">
                     {#if dark}
                         <SunIcon class="size-4" />
                     {:else}
                         <MoonIcon class="size-4" />
                     {/if}
                 </button>
-                <a href="/login" class="btn preset-filled-primary-500 px-4 py-1.5 rounded-md text-sm">Sign in</a>
+
+                <a href="/login" class="btn preset-filled-primary-500 px-5 py-2 rounded-lg font-medium shadow-lg shadow-primary-500/20">Sign in</a>
             </div>
         </div>
     </nav>
@@ -90,7 +92,7 @@
     <section class="max-w-5xl mx-auto px-6 pb-24">
         <div class="grid sm:grid-cols-2 gap-6">
             {#each features as feature}
-                <div class="rounded-xl border border-surface-200 dark:border-surface-800 p-6">
+                <div class="glass-card p-6">
                     <h2 class="font-semibold text-lg mb-2">{feature.title}</h2>
                     <p class="text-surface-600 dark:text-surface-400 text-sm">{feature.description}</p>
                 </div>
