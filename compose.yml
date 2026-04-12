@@ -7,32 +7,61 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-    ports:
-      - "${POSTGRES_PORT}:5432"
     volumes:
       - db_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   bot:
-    profiles: ["bot"]
-    build: ./bot
+    build:
+      context: ./bot
+      dockerfile: Dockerfile
     restart: unless-stopped
     env_file: .env
     depends_on:
-      - db
-    environment:
-      DATABASE_URL: ${DATABASE_URL}
+      db:
+        condition: service_healthy
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - "3000"
 
   dashboard:
-    profiles: ["dashboard"]
-    build: dashboard
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
     restart: unless-stopped
     env_file: .env
-    depends_on:
-      - db
+    expose:
+      - "3001"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
     ports:
-      - "3000:3000"
-    environment:
-      DATABASE_URL: ${DATABASE_URL}
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+      - dashboard
 
 volumes:
   db_data:
+  caddy_data:
+  caddy_config:
