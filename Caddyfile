@@ -2,9 +2,9 @@ firesongherald.com, www.firesongherald.com {
 	encode gzip
 
 	# Dashboard
-	handle / {
-		reverse_proxy dashboard:3001
-	}
+    handle /* {
+                  reverse_proxy dashboard:3001
+              }
 
 	# API
 	handle /api/* {
