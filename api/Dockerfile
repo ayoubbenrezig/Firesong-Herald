@@ -33,4 +33,4 @@ COPY --from=builder /app/api/dist ./api/dist
 
 EXPOSE 3000
 
-CMD ["node", "api/dist/index.js"]
+CMD ["node", "api/dist/api/src/index.js"]
