@@ -1,10 +1,37 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import { logger } from './lib/logger.js';
 import { healthRoutes } from './routes/health.js';
+import { authRoutes } from './routes/auth.js';
+
+// Load .env from project root
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const possiblePaths = [
+    path.resolve(__dirname, '../../.env'),
+    path.resolve(process.cwd(), '.env'),
+    path.resolve(process.cwd(), '..', '.env'),
+];
+
+let envPath: string | null = null;
+for (const p of possiblePaths) {
+    if (fs.existsSync(p)) {
+        envPath = p;
+        break;
+    }
+}
+
+if (envPath) {
+    dotenv.config({ path: envPath });
+} else {
+    console.warn('⚠️  .env file not found, relying on system environment variables');
+}
 
 // ============================================================================
 // SERVER BOOTSTRAP
@@ -56,6 +83,7 @@ async function buildServer(): Promise<ReturnType<typeof Fastify>> {
 
     // ── Routes ────────────────────────────────────────────────────────────────
     await app.register(healthRoutes);
+    await app.register(authRoutes);
 
     return app;
 }

@@ -6,6 +6,19 @@ import { sveltePhosphorOptimize } from 'phosphor-svelte/vite';
 
 export default defineConfig({
     plugins: [tailwindcss(), sveltekit(), sveltePhosphorOptimize()],
+    envDir: '../',
+    server: {
+        proxy: {
+            '/api': {
+                target: 'http://localhost:3001',
+                changeOrigin: true,
+            },
+            '/auth': {
+                target: 'http://localhost:3001',
+                changeOrigin: true,
+            },
+        },
+    },
     test: {
         expect: { requireAssertions: true },
         projects: [

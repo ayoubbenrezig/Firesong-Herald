@@ -2,94 +2,189 @@
  * Unit tests for server-side auth utilities.
  *
  * Tests cover:
- * - isAuthenticated: valid session, missing cookie, empty string, whitespace
- *   variations, type coercion edge cases, extremely large tokens
+ * - verifySession: valid JWT, invalid signature, expired token, tampered payload,
+ *   missing secret, empty cookie, whitespace, type coercion edge cases
  * - isProtectedRoute: protected paths, public paths, query strings, fragments,
  *   special characters, relative paths, trailing slashes, bypass attempts
  */
 
 import { describe, it, expect } from 'vitest';
-import { isAuthenticated, isProtectedRoute } from '$lib/server/auth';
+import { verifySession, isProtectedRoute } from '$lib/server/auth';
+import pkg from 'jsonwebtoken';
+
+const { sign } = pkg;
+
+const SECRET = 'test-secret-key';
+const OTHER_SECRET = 'different-secret-key';
+
+function makeToken(payload: object, secret: string = SECRET, options: object = {}): string {
+    return sign(payload, secret, { expiresIn: '1h', ...options });
+}
 
 // ============================================================================
-// isAuthenticated
+// verifySession
 // ============================================================================
 
-describe('isAuthenticated', () => {
+describe('verifySession', () => {
 
-    // ───── Valid sessions ─────
+    // ───── Valid tokens ─────
 
-    it('returns true for a valid session token', () => {
-        expect(isAuthenticated('abc123')).toBe(true);
+    it('returns valid result for a correctly signed token', () => {
+        const token = makeToken({ discordId: '123', username: 'ben' });
+        const result = verifySession(token, SECRET);
+        expect(result.valid).toBe(true);
+        if (result.valid) {
+            expect(result.user.discordId).toBe('123');
+            expect(result.user.username).toBe('ben');
+        }
     });
 
-    it('returns true for a UUID-style token', () => {
-        expect(isAuthenticated('550e8400-e29b-41d4-a716-446655440000')).toBe(true);
+    it('returns valid result with optional avatar and globalName', () => {
+        const token = makeToken({ discordId: '123', username: 'ben', avatar: 'abc', globalName: 'Ben' });
+        const result = verifySession(token, SECRET);
+        expect(result.valid).toBe(true);
+        if (result.valid) {
+            expect(result.user.avatar).toBe('abc');
+            expect(result.user.globalName).toBe('Ben');
+        }
     });
 
-    it('returns true for a long session token', () => {
-        expect(isAuthenticated('a'.repeat(256))).toBe(true);
+    it('returns null avatar and globalName when not present in token', () => {
+        const token = makeToken({ discordId: '123', username: 'ben' });
+        const result = verifySession(token, SECRET);
+        expect(result.valid).toBe(true);
+        if (result.valid) {
+            expect(result.user.avatar).toBeNull();
+            expect(result.user.globalName).toBeNull();
+        }
     });
 
-    it('returns true for an extremely large token', () => {
-        expect(isAuthenticated('x'.repeat(10000))).toBe(true);
+    // ───── Invalid signature ─────
+
+    it('returns invalid for a token signed with a different secret', () => {
+        const token = makeToken({ discordId: '123', username: 'ben' }, OTHER_SECRET);
+        const result = verifySession(token, SECRET);
+        expect(result.valid).toBe(false);
+        expect(result.user).toBeNull();
     });
 
-    it('returns true for a token with special characters', () => {
-        expect(isAuthenticated('abc.123-xyz_456')).toBe(true);
+    it('returns invalid for a tampered token', () => {
+        const token = makeToken({ discordId: '123', username: 'ben' });
+        const tampered = token.slice(0, -5) + 'XXXXX';
+        const result = verifySession(tampered, SECRET);
+        expect(result.valid).toBe(false);
+        expect(result.user).toBeNull();
     });
 
-    it('returns true for a valid token with surrounding whitespace', () => {
-        expect(isAuthenticated(' abc123 ')).toBe(true);
+    it('returns invalid for a randomly generated string', () => {
+        const result = verifySession('notavalidjwt', SECRET);
+        expect(result.valid).toBe(false);
+        expect(result.user).toBeNull();
     });
 
-    // ───── Invalid sessions ─────
+    // ───── Expired token ─────
 
-    it('returns false when session cookie is undefined', () => {
-        expect(isAuthenticated(undefined)).toBe(false);
+    it('returns invalid for an expired token', () => {
+        const token = makeToken({ discordId: '123', username: 'ben' }, SECRET, { expiresIn: -1 });
+        const result = verifySession(token, SECRET);
+        expect(result.valid).toBe(false);
+        expect(result.user).toBeNull();
     });
 
-    it('returns false when session cookie is an empty string', () => {
-        expect(isAuthenticated('')).toBe(false);
+    // ───── Missing required payload fields ─────
+
+    it('returns invalid when discordId is missing from payload', () => {
+        const token = makeToken({ username: 'ben' });
+        const result = verifySession(token, SECRET);
+        expect(result.valid).toBe(false);
+        expect(result.user).toBeNull();
     });
 
-    it('returns false when session cookie is spaces only', () => {
-        expect(isAuthenticated('   ')).toBe(false);
+    it('returns invalid when username is missing from payload', () => {
+        const token = makeToken({ discordId: '123' });
+        const result = verifySession(token, SECRET);
+        expect(result.valid).toBe(false);
+        expect(result.user).toBeNull();
     });
 
-    it('returns false when session cookie is tabs only', () => {
-        expect(isAuthenticated('\t\t')).toBe(false);
+    it('returns invalid when payload is completely empty', () => {
+        const token = makeToken({});
+        const result = verifySession(token, SECRET);
+        expect(result.valid).toBe(false);
+        expect(result.user).toBeNull();
     });
 
-    it('returns false when session cookie is newlines only', () => {
-        expect(isAuthenticated('\n\n')).toBe(false);
+    // ───── Missing or empty secret ─────
+
+    it('returns invalid when secret is an empty string', () => {
+        const token = makeToken({ discordId: '123', username: 'ben' });
+        const result = verifySession(token, '');
+        expect(result.valid).toBe(false);
+        expect(result.user).toBeNull();
     });
 
-    it('returns false when session cookie is mixed whitespace', () => {
-        expect(isAuthenticated(' \t\n ')).toBe(false);
+    // ───── Missing or empty cookie ─────
+
+    it('returns invalid when cookie is undefined', () => {
+        const result = verifySession(undefined, SECRET);
+        expect(result.valid).toBe(false);
+        expect(result.user).toBeNull();
+    });
+
+    it('returns invalid when cookie is an empty string', () => {
+        const result = verifySession('', SECRET);
+        expect(result.valid).toBe(false);
+        expect(result.user).toBeNull();
+    });
+
+    it('returns invalid when cookie is whitespace only', () => {
+        const result = verifySession('   ', SECRET);
+        expect(result.valid).toBe(false);
+        expect(result.user).toBeNull();
+    });
+
+    it('returns invalid when cookie is tabs only', () => {
+        const result = verifySession('\t\t', SECRET);
+        expect(result.valid).toBe(false);
+        expect(result.user).toBeNull();
+    });
+
+    it('returns invalid when cookie is mixed whitespace', () => {
+        const result = verifySession(' \t\n ', SECRET);
+        expect(result.valid).toBe(false);
+        expect(result.user).toBeNull();
     });
 
     // ───── Type coercion edge cases ─────
-    // TypeScript prevents these at compile time but we test runtime safety.
 
-    it('returns false when passed null (coerced via unknown)', () => {
-        expect(isAuthenticated(null as unknown as undefined)).toBe(false);
+    it('returns invalid when passed null (coerced via unknown)', () => {
+        const result = verifySession(null as unknown as undefined, SECRET);
+        expect(result.valid).toBe(false);
+        expect(result.user).toBeNull();
     });
 
-    it('returns false when passed 0 (coerced via unknown)', () => {
-        expect(isAuthenticated(0 as unknown as undefined)).toBe(false);
+    it('returns invalid when passed 0 (coerced via unknown)', () => {
+        const result = verifySession(0 as unknown as undefined, SECRET);
+        expect(result.valid).toBe(false);
+        expect(result.user).toBeNull();
     });
 
-    it('returns false when passed false (coerced via unknown)', () => {
-        expect(isAuthenticated(false as unknown as undefined)).toBe(false);
+    it('returns invalid when passed false (coerced via unknown)', () => {
+        const result = verifySession(false as unknown as undefined, SECRET);
+        expect(result.valid).toBe(false);
+        expect(result.user).toBeNull();
     });
 
-    it('returns false when passed an object (coerced via unknown)', () => {
-        expect(isAuthenticated({} as unknown as undefined)).toBe(false);
+    it('returns invalid when passed an object (coerced via unknown)', () => {
+        const result = verifySession({} as unknown as undefined, SECRET);
+        expect(result.valid).toBe(false);
+        expect(result.user).toBeNull();
     });
 
-    it('returns false when passed an array (coerced via unknown)', () => {
-        expect(isAuthenticated([] as unknown as undefined)).toBe(false);
+    it('returns invalid when passed an array (coerced via unknown)', () => {
+        const result = verifySession([] as unknown as undefined, SECRET);
+        expect(result.valid).toBe(false);
+        expect(result.user).toBeNull();
     });
 });
 
@@ -116,7 +211,6 @@ describe('isProtectedRoute', () => {
     });
 
     it('returns true for /app/ with query string (as pathname only)', () => {
-        // hooks passes event.url.pathname which strips query strings
         expect(isProtectedRoute('/app/events')).toBe(true);
     });
 
@@ -143,8 +237,6 @@ describe('isProtectedRoute', () => {
     });
 
     // ───── Query strings and fragments (pathname only) ─────
-    // SvelteKit passes event.url.pathname which never includes ? or #.
-    // These tests confirm the function behaves correctly for clean pathnames.
 
     it('returns false for /login (no query string confusion)', () => {
         expect(isProtectedRoute('/login')).toBe(false);
