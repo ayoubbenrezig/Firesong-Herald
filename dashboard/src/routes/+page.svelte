@@ -47,9 +47,10 @@
         <div class="mx-auto flex items-center justify-between">
             <span class="brand-text text-lg font-bold">Firesong Herald</span>
             <div class="flex items-center gap-6 text-sm">
-                <a href="https://github.com/ayoubbenrezig/Firesong-Herald" target="_blank" rel="noopener noreferrer" class="opacity-70 hover:opacity-100 transition-opacity">GitHub</a>
-                <a href="/privacy" class="opacity-70 hover:opacity-100 transition-opacity">Privacy</a>
-                <a href="/tos" class="opacity-70 hover:opacity-100 transition-opacity">Terms</a>
+                <a href="https://github.com/ayoubbenrezig/Firesong-Herald" target="_blank" rel="noopener noreferrer" class="nav-link">GitHub</a>
+                <a href="/privacy" class="nav-link">Privacy</a>
+                <a href="/tos" class="nav-link">Terms</a>
+                <a href="/app" class="nav-link">Dashboard</a>
 
                 <button onclick={handleToggle} class="cursor-pointer p-1.5 rounded-full hover:bg-white/10 transition-colors" aria-label="Toggle dark mode">
                     {#if dark}
@@ -79,10 +80,7 @@
             >
                 Add to Discord
             </a>
-            <a
-                    href="/login"
-                    class="btn preset-outlined-surface-500 px-6 py-3 rounded-md font-medium"
-            >
+            <a href="/app" class="btn preset-outlined-surface-500 px-6 py-3 rounded-md font-medium">
                 Open Dashboard
             </a>
         </div>
@@ -101,7 +99,7 @@
     </section>
 
     <!-- Footer -->
-    <footer class="border-t border-surface-200 dark:border-surface-800 px-6 py-6 text-center text-sm text-surface-500">
+    <footer class="border-t border-surface-200 dark:border-surface-800 px-6 py-6 text-center text-sm text-surface-500 mt-auto">
         <div class="flex flex-wrap justify-center gap-4">
             <a href="/privacy" class="hover:underline">Privacy Policy</a>
             <a href="/tos" class="hover:underline">Terms of Service</a>
