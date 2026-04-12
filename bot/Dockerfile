@@ -2,13 +2,20 @@ FROM node:24-alpine AS builder
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci
+# Install and generate Prisma client
+COPY db/package*.json ./db/
+COPY db/prisma ./db/prisma
+COPY db/prisma.config.ts ./db/
+RUN cd db && npm ci && npx prisma generate
 
-COPY tsconfig.json ./
-COPY src ./src
+# Install and build bot
+COPY bot/package*.json ./bot/
+RUN cd bot && npm ci
 
-RUN npm run build
+COPY bot/tsconfig.json ./bot/
+COPY bot/src ./bot/src
+
+RUN cd bot && npm run build
 
 # ---
 
@@ -18,9 +25,10 @@ ENV NODE_ENV=production
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci --omit=dev
+COPY bot/package*.json ./bot/
+RUN cd bot && npm ci --omit=dev
 
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/db/generated ./db/generated
+COPY --from=builder /app/bot/dist ./bot/dist
 
-CMD ["node", "dist/index.js"]
+CMD ["node", "bot/dist/index.js"]

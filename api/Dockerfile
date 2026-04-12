@@ -2,13 +2,20 @@ FROM node:24-alpine AS builder
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci
+# Install and generate Prisma client
+COPY db/package*.json ./db/
+COPY db/prisma ./db/prisma
+COPY db/prisma.config.ts ./db/
+RUN cd db && npm ci && npx prisma generate
 
-COPY tsconfig.json ./
-COPY src ./src
+# Install and build API
+COPY api/package*.json ./api/
+RUN cd api && npm ci
 
-RUN npm run build
+COPY api/tsconfig.json ./api/
+COPY api/src ./api/src
+
+RUN cd api && npm run build
 
 # ---
 
@@ -18,11 +25,12 @@ ENV NODE_ENV=production
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci --omit=dev
+COPY api/package*.json ./api/
+RUN cd api && npm ci --omit=dev
 
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/db/generated ./db/generated
+COPY --from=builder /app/api/dist ./api/dist
 
 EXPOSE 3000
 
-CMD ["node", "dist/index.js"]
+CMD ["node", "api/dist/index.js"]
