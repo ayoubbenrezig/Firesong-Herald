@@ -21,7 +21,6 @@
 	"devDependencies": {
 		"@eslint/compat": "^2.0.4",
 		"@eslint/js": "^10.0.1",
-		"@sveltejs/adapter-auto": "^7.0.1",
 		"@sveltejs/kit": "^2.57.0",
 		"@sveltejs/vite-plugin-svelte": "^7.0.0",
 		"@tailwindcss/typography": "^0.5.19",
@@ -49,6 +48,7 @@
 	"dependencies": {
 		"@skeletonlabs/skeleton": "^4.15.1",
 		"@skeletonlabs/skeleton-svelte": "^4.15.1",
+		"@sveltejs/adapter-node": "^5.5.4",
 		"dotenv": "^17.4.1",
 		"jsonwebtoken": "^9.0.3",
 		"phosphor-svelte": "^3.1.0"

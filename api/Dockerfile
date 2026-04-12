@@ -8,14 +8,14 @@ COPY db/prisma ./db/prisma
 COPY db/prisma.config.ts ./db/
 RUN cd db && npm ci && npx prisma generate
 
-# Install and build bot
-COPY bot/package*.json ./bot/
-RUN cd bot && npm ci
+# Install and build API
+COPY api/package*.json ./api/
+RUN cd api && npm ci
 
-COPY bot/tsconfig.json ./bot/
-COPY bot/src ./bot/src
+COPY api/tsconfig.json ./api/
+COPY api/src ./api/src
 
-RUN cd bot && npm run build
+RUN cd api && npm run build
 
 # ---
 
@@ -25,10 +25,12 @@ ENV NODE_ENV=production
 
 WORKDIR /app
 
-COPY bot/package*.json ./bot/
-RUN cd bot && npm ci --omit=dev
+COPY api/package*.json ./api/
+RUN cd api && npm ci --omit=dev
 
 COPY --from=builder /app/db/generated ./db/generated
-COPY --from=builder /app/bot/dist ./bot/dist
+COPY --from=builder /app/api/dist ./api/dist
 
-CMD ["node", "bot/dist/index.js"]
+EXPOSE 3000
+
+CMD ["node", "api/dist/api/src/index.js"]
