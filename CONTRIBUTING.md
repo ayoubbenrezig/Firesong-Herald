@@ -10,7 +10,7 @@ Please read this document before opening issues or pull requests.
 
 - Node.js 24+
 - npm
-- Docker and Docker Compose (for running the database locally)
+- Docker and Docker Compose (for running the database and services locally)
 - A Discord application and bot token for local testing
 
 ### Windows Users
@@ -28,6 +28,8 @@ Add this line, save, and restart PowerShell:
 [console]::InputEncoding = [console]::OutputEncoding = New-Object System.Text.UTF8Encoding
 ```
 
+---
+
 ## Getting Started
 
 1. Fork the repository
@@ -41,7 +43,7 @@ Add this line, save, and restart PowerShell:
    cd db && npx prisma generate && cd ..
    ```
 5. Copy `.env.example` to `.env` and fill in your local values
-6. Start the database:
+6. Start the database only:
    ```bash
    docker compose up db
    ```
@@ -49,12 +51,27 @@ Add this line, save, and restart PowerShell:
    ```bash
    cd api && npm run dev
    ```
+8. Start the bot (separate terminal):
+   ```bash
+   cd bot && npm run dev
+   ```
+9. Start the dashboard (separate terminal):
+   ```bash
+   cd dashboard && npm run dev
+   ```
+
+> To run the full stack in Docker instead, use `docker compose up --build`.
+
+---
 
 ## Making Changes
 
 - Create a branch following the naming convention in [GIT_CONVENTIONS.md](./GIT_CONVENTIONS.md)
 - Commit your changes following the commit format in [GIT_CONVENTIONS.md](./GIT_CONVENTIONS.md)
 - Keep changes focused — one issue per branch
+- If your change introduces a user-facing addition, fix, or removal, add an entry to the `[Unreleased]` section of [CHANGELOG.md](./CHANGELOG.md) following the format defined in [GIT_CONVENTIONS.md](./GIT_CONVENTIONS.md)
+
+---
 
 ## Opening a Pull Request
 
@@ -64,12 +81,16 @@ Add this line, save, and restart PowerShell:
 - Link the related issue with `Closes #N` in the PR description
 - Keep PRs small and focused where possible
 
+---
+
 ## Code Style
 
 - TypeScript throughout — no plain JavaScript
 - Modular structure, separated by concern
 - Named functions preferred over arrow functions for anything with real logic
 - Follow the existing file and folder structure of the relevant workspace
+
+---
 
 ## Reporting Bugs
 

@@ -139,3 +139,46 @@ Release v0.1.0-alpha
 Release v0.1.0-beta
 Release v1.0.0
 ```
+
+---
+
+## Changelog
+
+Firesong Herald maintains a `CHANGELOG.md` in the project root.
+Format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/).
+
+### Category order
+
+Always in this order. Skip any category with no entries.
+
+1. `Added` — new features
+2. `Changed` — changes to existing functionality
+3. `Deprecated` — features to be removed in a future release
+4. `Removed` — features removed in this release
+5. `Fixed` — bug fixes
+6. `Security` — security fixes or hardening
+
+### Rules
+
+- File name: `CHANGELOG.md` in the project root
+- Most recent release at the top, oldest at the bottom
+- Keep an `[Unreleased]` section at the top — add entries there as PRs are merged, move to a version section at release time
+- Each entry is one line, written in past tense to match commit style
+- Version headers link to the GitHub compare URL, defined at the bottom of the file
+- Skip internal refactors and housekeeping unless they affect behaviour
+- Never edit a released version's entries
+
+### Version header format
+
+```
+## [v0.1.0-alpha] - 2026-04-13
+```
+
+### Footer links
+
+At the bottom of `CHANGELOG.md`, maintain comparison links:
+
+```
+[Unreleased]: https://github.com/ayoubbenrezig/Firesong-Herald/compare/v0.1.0-alpha...HEAD
+[v0.1.0-alpha]: https://github.com/ayoubbenrezig/Firesong-Herald/releases/tag/v0.1.0-alpha
+```
