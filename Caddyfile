@@ -1,14 +1,29 @@
+{
+    order rate_limit before basicauth
+}
+
 firesongherald.com, www.firesongherald.com {
 
-    rate_limit {remote.ip} 60r/m
-
     handle /api/auth/* {
-                           rate_limit {remote.ip} 10r/m
+                           rate_limit {
+                                          zone auth_zone {
+                                                             key {http.request.remote_ip}
+                                                             events 10
+                                                             window 1m
+                                                         }
+                                      }
                            uri strip_prefix /api
                            reverse_proxy api:3000
                        }
 
     handle /api/* {
+                      rate_limit {
+                                     zone api_zone {
+                                                       key {http.request.remote_ip}
+                                                       events 60
+                                                       window 1m
+                                                   }
+                                 }
                       uri strip_prefix /api
                       reverse_proxy api:3000
                   }
@@ -18,6 +33,13 @@ firesongherald.com, www.firesongherald.com {
                  }
 
     handle /* {
+                  rate_limit {
+                                 zone global_zone {
+                                                      key {http.request.remote_ip}
+                                                      events 60
+                                                      window 1m
+                                                  }
+                             }
                   reverse_proxy dashboard:3001
               }
 
