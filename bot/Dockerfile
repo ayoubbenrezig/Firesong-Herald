@@ -30,7 +30,7 @@ WORKDIR /app
 COPY bot/package*.json ./bot/
 RUN cd bot && npm ci --omit=dev
 
-COPY --from=builder /app/db/generated ./db/generated
+COPY --from=builder /app/db/generated ./bot/dist/db/generated
 COPY --from=builder /app/bot/dist ./bot/dist
 
 RUN chown -R firesong:firesong /app
