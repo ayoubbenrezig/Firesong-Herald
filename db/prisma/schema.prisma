@@ -5,7 +5,7 @@
 /// Prisma Client code generator configuration.
 /// Generates TypeScript client from the schema with auto-generated types.
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../generated/prisma"
 }
 
