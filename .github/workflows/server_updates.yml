@@ -19,8 +19,8 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            sudo apt update -qq
-            sudo apt upgrade -y -qq
+            sudo apt update -qq || exit 1
+            sudo apt upgrade -y -qq || exit 1
             if [ -f /var/run/reboot-required ]; then
               echo "REBOOT_REQUIRED=true" >> /tmp/update_status
             else

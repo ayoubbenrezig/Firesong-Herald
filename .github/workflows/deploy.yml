@@ -19,10 +19,10 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /home/deploy/firesong-herald
-            git pull
-            docker compose run --rm bot node bot/dist/bot/src/scripts/deploy.js
-            docker compose run --rm api sh -c "cd db && npx prisma migrate deploy"
-            docker compose up -d --build
+            git pull || exit 1
+            docker compose up -d --build || exit 1
+            docker compose run --rm bot node bot/dist/bot/src/scripts/deploy.js || exit 1
+            docker compose run --rm api sh -c "cd /app/db && npx prisma migrate deploy" || exit 1
 
       - name: Notify Discord on success
         if: success()
