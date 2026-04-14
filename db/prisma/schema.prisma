@@ -422,3 +422,33 @@ model Calendar {
   @@index([discordServerId])
   @@map("calendars")
 }
+
+// ───── Tester ─────
+/// A Discord user approved for dashboard and UI testing.
+model Tester {
+  /// The Discord user snowflake ID — serves as the primary key.
+  discordUserId String @id @map("discord_user_id")
+
+  /// Discord user ID of the admin who approved this tester.
+  addedBy String @map("added_by")
+
+  /// Timestamp of when this tester was approved.
+  addedAt DateTime @default(now()) @map("added_at")
+
+  @@map("testers")
+}
+
+// ───── ApprovedServer ─────
+/// A Discord server approved for bot and functional testing.
+model ApprovedServer {
+  /// The Discord guild snowflake ID — serves as the primary key.
+  discordServerId String @id @map("discord_server_id")
+
+  /// Discord user ID of the admin who approved this server.
+  addedBy String @map("added_by")
+
+  /// Timestamp of when this server was approved.
+  addedAt DateTime @default(now()) @map("added_at")
+
+  @@map("approved_servers")
+}
