@@ -2,7 +2,7 @@ name: Server Auto-Update
 
 on:
   schedule:
-    - cron: '0 3 * * *' # Every Day at 3am UTC
+    - cron: '0 3 * * 0' # Every Sunday at 3am UTC
   workflow_dispatch:
 
 jobs:
@@ -20,33 +20,67 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             sudo apt update -qq
-            UPGRADABLE=$(apt list --upgradable 2>/dev/null | grep -c upgradable || true)
             sudo apt upgrade -y -qq
-            REBOOT_REQUIRED=false
             if [ -f /var/run/reboot-required ]; then
-              REBOOT_REQUIRED=true
+              echo "REBOOT_REQUIRED=true" >> /tmp/update_status
+            else
+              echo "REBOOT_REQUIRED=false" >> /tmp/update_status
             fi
-            echo "upgradable=$UPGRADABLE"
-            echo "reboot_required=$REBOOT_REQUIRED"
+            cat /tmp/update_status
+            rm -f /tmp/update_status
 
-      - name: Notify Discord on success
-        if: success()
+      - name: Check reboot status
+        id: reboot
+        uses: appleboy/ssh-action@v1.2.1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            if [ -f /var/run/reboot-required ]; then
+              echo "true"
+            else
+              echo "false"
+            fi
+
+      - name: Notify Discord — no reboot needed
+        if: success() && steps.reboot.outputs.stdout != 'true'
         run: |
           curl -H "Content-Type: application/json" \
             -d '{
               "embeds": [{
                 "title": "🔧 Server Updated",
-                "description": "Weekly package update completed successfully.",
+                "description": "Daily package update completed successfully.",
                 "color": 5763719,
                 "fields": [
                   {
                     "name": "Status",
+                    "value": "✅ Packages upgraded — no reboot needed",
+                    "inline": false
+                  }
+                ]
+              }]
+            }' \
+            ${{ secrets.DISCORD_WEBHOOK_SERVER }}
+
+      - name: Notify Discord — reboot required
+        if: success() && steps.reboot.outputs.stdout == 'true'
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d '{
+              "embeds": [{
+                "title": "🔧 Server Updated",
+                "description": "Daily package update completed successfully.",
+                "color": 16776960,
+                "fields": [
+                  {
+                    "name": "Status",
                     "value": "✅ Packages upgraded",
-                    "inline": true
+                    "inline": false
                   },
                   {
-                    "name": "Reboot Required",
-                    "value": "Check server — run `sudo reboot` when ready if needed.",
+                    "name": "⚠️ Reboot Required",
+                    "value": "SSH in and run `sudo reboot` when ready.",
                     "inline": false
                   }
                 ]
