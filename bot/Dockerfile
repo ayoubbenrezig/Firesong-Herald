@@ -23,6 +23,8 @@ FROM node:24-alpine AS runner
 
 ENV NODE_ENV=production
 
+RUN addgroup -S firesong && adduser -S firesong -G firesong
+
 WORKDIR /app
 
 COPY bot/package*.json ./bot/
@@ -30,5 +32,9 @@ RUN cd bot && npm ci --omit=dev
 
 COPY --from=builder /app/db/generated ./db/generated
 COPY --from=builder /app/bot/dist ./bot/dist
+
+RUN chown -R firesong:firesong /app
+
+USER firesong
 
 CMD ["node", "bot/dist/index.js"]
