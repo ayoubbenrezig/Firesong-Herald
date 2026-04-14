@@ -30,11 +30,13 @@ WORKDIR /app
 COPY api/package*.json ./api/
 RUN cd api && npm ci --omit=dev
 
+COPY db/package*.json ./db/
+RUN cd db && npm ci --omit=dev
+
 COPY --from=builder /app/db/generated ./db/generated
 COPY --from=builder /app/db/prisma ./db/prisma
 COPY --from=builder /app/db/prisma.config.ts ./db/prisma.config.ts
 COPY --from=builder /app/api/dist ./api/dist
-
 RUN chown -R firesong:firesong /app
 
 USER firesong
