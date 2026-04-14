@@ -39,7 +39,7 @@ jobs:
                   },
                   {
                     "name": "Triggered by",
-                    "value": "${{ github.event.head_commit.author.name }}",
+                    "value": "${{ secrets.DEPLOY_NAME }}",
                     "inline": true
                   },
                   {
@@ -69,7 +69,7 @@ jobs:
                   },
                   {
                     "name": "Triggered by",
-                    "value": "${{ github.event.head_commit.author.name }}",
+                    "value": "${{ secrets.DEPLOY_NAME }}",
                     "inline": true
                   },
                   {

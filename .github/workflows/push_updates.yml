@@ -21,7 +21,7 @@ jobs:
                 "fields": [
                   {
                     "name": "Author",
-                    "value": "${{ github.event.head_commit.author.name }}",
+                    "value": "${{ secrets.DEPLOY_NAME }}",
                     "inline": true
                   },
                   {

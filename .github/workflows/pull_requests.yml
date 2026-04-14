@@ -48,7 +48,7 @@ jobs:
                 "fields": [
                   {
                     "name": "Author",
-                    "value": "${{ github.event.pull_request.user.login }}",
+                    "value": "${{ secrets.DEPLOY_NAME }}",
                     "inline": true
                   },
                   {
