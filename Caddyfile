@@ -1,6 +1,15 @@
 firesongherald.com, www.firesongherald.com {
 
+    rate_limit {remote.ip} 60r/m
+
+    handle /api/auth/* {
+                           rate_limit {remote.ip} 10r/m
+                           uri strip_prefix /api
+                           reverse_proxy api:3000
+                       }
+
     handle /api/* {
+                      uri strip_prefix /api
                       reverse_proxy api:3000
                   }
 

@@ -23,6 +23,8 @@ FROM node:24-alpine AS runner
 
 ENV NODE_ENV=production
 
+RUN addgroup -S firesong && adduser -S firesong -G firesong
+
 WORKDIR /app
 
 COPY api/package*.json ./api/
@@ -30,6 +32,10 @@ RUN cd api && npm ci --omit=dev
 
 COPY --from=builder /app/db/generated ./db/generated
 COPY --from=builder /app/api/dist ./api/dist
+
+RUN chown -R firesong:firesong /app
+
+USER firesong
 
 EXPOSE 3000
 

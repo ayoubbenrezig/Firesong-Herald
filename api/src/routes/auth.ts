@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import oauth2, { type OAuth2Namespace } from '@fastify/oauth2';
 import cookie from '@fastify/cookie';
 import jwt from '@fastify/jwt';
+import rateLimit from '@fastify/rate-limit';
 
 // ============================================================================
 // TYPE AUGMENTATION
@@ -79,6 +80,11 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
         scope: ['identify'],
         startRedirectPath: '/auth/discord',
         callbackUri: DISCORD_REDIRECT_URI,
+    });
+
+    await app.register(rateLimit, {
+        max: 10,
+        timeWindow: '1 minute',
     });
 
     // ── Callback ──────────────────────────────────────────────────────────────

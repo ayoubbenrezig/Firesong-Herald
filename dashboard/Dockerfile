@@ -19,12 +19,18 @@ ENV NODE_ENV=production
 ENV PORT=3001
 ENV HOST=0.0.0.0
 
+RUN addgroup -S firesong && adduser -S firesong -G firesong
+
 WORKDIR /app
 
 COPY package*.json ./
 RUN npm ci --omit=dev
 
 COPY --from=builder /app/build ./build
+
+RUN chown -R firesong:firesong /app
+
+USER firesong
 
 EXPOSE 3001
 
