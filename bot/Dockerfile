@@ -37,4 +37,4 @@ RUN chown -R firesong:firesong /app
 
 USER firesong
 
-CMD ["node", "bot/dist/index.js"]
+CMD ["node", "bot/dist/bot/src/index.js"]
