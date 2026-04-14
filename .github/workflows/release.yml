@@ -1,0 +1,40 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  notify:
+    name: Notify Discord
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Notify Discord
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d '{
+              "embeds": [{
+                "title": "🎉 ${{ github.event.release.tag_name }} Released",
+                "description": "${{ github.event.release.name }}\n\n${{ github.event.release.body }}",
+                "color": 15844367,
+                "fields": [
+                  {
+                    "name": "Tag",
+                    "value": "`${{ github.event.release.tag_name }}`",
+                    "inline": true
+                  },
+                  {
+                    "name": "Pre-release",
+                    "value": "${{ github.event.release.prerelease }}",
+                    "inline": true
+                  },
+                  {
+                    "name": "View Release",
+                    "value": "[GitHub](${{ github.event.release.html_url }})",
+                    "inline": false
+                  }
+                ]
+              }]
+            }' \
+            ${{ secrets.DISCORD_WEBHOOK_RELEASES }}

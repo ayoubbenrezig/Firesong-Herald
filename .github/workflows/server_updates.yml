@@ -1,0 +1,75 @@
+name: Server Auto-Update
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # Every Day at 3am UTC
+  workflow_dispatch:
+
+jobs:
+  update:
+    name: Update server packages
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Run apt upgrade on server
+        uses: appleboy/ssh-action@v1.2.1
+        id: upgrade
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            sudo apt update -qq
+            UPGRADABLE=$(apt list --upgradable 2>/dev/null | grep -c upgradable || true)
+            sudo apt upgrade -y -qq
+            REBOOT_REQUIRED=false
+            if [ -f /var/run/reboot-required ]; then
+              REBOOT_REQUIRED=true
+            fi
+            echo "upgradable=$UPGRADABLE"
+            echo "reboot_required=$REBOOT_REQUIRED"
+
+      - name: Notify Discord on success
+        if: success()
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d '{
+              "embeds": [{
+                "title": "🔧 Server Updated",
+                "description": "Weekly package update completed successfully.",
+                "color": 5763719,
+                "fields": [
+                  {
+                    "name": "Status",
+                    "value": "✅ Packages upgraded",
+                    "inline": true
+                  },
+                  {
+                    "name": "Reboot Required",
+                    "value": "Check server — run `sudo reboot` when ready if needed.",
+                    "inline": false
+                  }
+                ]
+              }]
+            }' \
+            ${{ secrets.DISCORD_WEBHOOK_SERVER }}
+
+      - name: Notify Discord on failure
+        if: failure()
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d '{
+              "embeds": [{
+                "title": "💥 Server Update Failed",
+                "description": "Weekly package update encountered an error. Manual intervention required.",
+                "color": 15548997,
+                "fields": [
+                  {
+                    "name": "Action",
+                    "value": "[View run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})",
+                    "inline": false
+                  }
+                ]
+              }]
+            }' \
+            ${{ secrets.DISCORD_WEBHOOK_SERVER }}

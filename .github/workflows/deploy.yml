@@ -1,4 +1,4 @@
-name: Deploy to Production
+name: Production Deploy
 
 on:
   push:
@@ -28,13 +28,13 @@ jobs:
           curl -H "Content-Type: application/json" \
             -d '{
               "embeds": [{
-                "title": "✅ Deployment Successful",
+                "title": "🚀 Deployment Successful",
                 "description": "**Firesong Herald** has been deployed to production.",
                 "color": 5763719,
                 "fields": [
                   {
                     "name": "Branch",
-                    "value": "main",
+                    "value": "${{ github.ref_name }}",
                     "inline": true
                   },
                   {
@@ -50,7 +50,7 @@ jobs:
                 ]
               }]
             }' \
-            ${{ secrets.DISCORD_WEBHOOK_URL }}
+            ${{ secrets.DISCORD_WEBHOOK_DEPLOYMENTS }}
 
       - name: Notify Discord on failure
         if: failure()
@@ -58,13 +58,13 @@ jobs:
           curl -H "Content-Type: application/json" \
             -d '{
               "embeds": [{
-                "title": "❌ Deployment Failed",
+                "title": "💥 Deployment Failed",
                 "description": "**Firesong Herald** deployment to production failed.",
                 "color": 15548997,
                 "fields": [
                   {
                     "name": "Branch",
-                    "value": "main",
+                    "value": "${{ github.ref_name }}",
                     "inline": true
                   },
                   {
@@ -80,4 +80,4 @@ jobs:
                 ]
               }]
             }' \
-            ${{ secrets.DISCORD_WEBHOOK_URL }}
+            ${{ secrets.DISCORD_WEBHOOK_DEPLOYMENTS }}

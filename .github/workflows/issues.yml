@@ -1,0 +1,50 @@
+name: Issues
+
+on:
+  issues:
+    types: [opened, closed, reopened]
+
+jobs:
+  notify:
+    name: Notify Discord
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set embed colour and status
+        id: meta
+        run: |
+          ACTION="${{ github.event.action }}"
+          if [ "$ACTION" = "opened" ]; then
+            echo "color=5763719" >> $GITHUB_OUTPUT
+            echo "icon=🟢" >> $GITHUB_OUTPUT
+          elif [ "$ACTION" = "closed" ]; then
+            echo "color=9807270" >> $GITHUB_OUTPUT
+            echo "icon=🔴" >> $GITHUB_OUTPUT
+          else
+            echo "color=16776960" >> $GITHUB_OUTPUT
+            echo "icon=🟡" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Notify Discord
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d '{
+              "embeds": [{
+                "title": "${{ steps.meta.outputs.icon }} Issue #${{ github.event.issue.number }} ${{ github.event.action }}",
+                "description": "**[${{ github.event.issue.title }}](${{ github.event.issue.html_url }})**",
+                "color": ${{ steps.meta.outputs.color }},
+                "fields": [
+                  {
+                    "name": "Author",
+                    "value": "${{ github.event.issue.user.login }}",
+                    "inline": true
+                  },
+                  {
+                    "name": "Labels",
+                    "value": "${{ join(github.event.issue.labels.*.name, ', ') || 'none' }}",
+                    "inline": true
+                  }
+                ]
+              }]
+            }' \
+            ${{ secrets.DISCORD_WEBHOOK_ISSUES }}
