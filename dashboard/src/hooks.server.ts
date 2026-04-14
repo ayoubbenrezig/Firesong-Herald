@@ -1,9 +1,5 @@
 import { redirect, type Handle } from '@sveltejs/kit';
 import { verifySession, isProtectedRoute } from '$lib/server/auth';
-import dotenv from 'dotenv';
-import path from 'path';
-
-dotenv.config({ path: path.resolve(process.cwd(), '..', '.env') });
 
 // ============================================================================
 // SERVER HOOK
