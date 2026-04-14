@@ -9,7 +9,7 @@ const __dirname = dirname(__filename);
 // Dynamically load and register all event handlers from the current directory
 export async function loadEvents(client: Client): Promise<void> {
     // Read all files except this file, filter for TypeScript/JavaScript
-    const files = readdirSync(__dirname).filter(f => f !== 'eventHandler.ts' && (f.endsWith('.ts') || f.endsWith('.js')));
+    const files = readdirSync(__dirname).filter(f => f !== 'eventHandler.ts' && f !== 'eventHandler.js' && (f.endsWith('.ts') || f.endsWith('.js')));
 
     // Import and register each event handler
     for (const file of files) {
