@@ -1,6 +1,6 @@
-import { PrismaClient } from '../../../db/generated/prisma/client';
+import { PrismaClient } from '../../../db/generated/prisma/client.js';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/logger.js';
 
 // ============================================================================
 // PRISMA CLIENT SINGLETON

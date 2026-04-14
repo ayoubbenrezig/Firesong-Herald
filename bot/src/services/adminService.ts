@@ -1,6 +1,6 @@
-import { type Tester, type ApprovedServer, type ServerRole } from '../../../db/generated/prisma/client';
-import { prisma } from './prisma';
-import { logger } from '../utils/logger';
+import { type Tester, type ApprovedServer, type ServerRole } from '../../../db/generated/prisma/client.js';
+import { prisma } from './prisma.js';
+import { logger } from '../utils/logger.js';
 
 // ============================================================================
 // TYPES
