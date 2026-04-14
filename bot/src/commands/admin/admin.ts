@@ -19,7 +19,7 @@ export const data = new SlashCommandBuilder()
     .addSubcommand(sub =>
         sub
             .setName('add-tester')
-            .setDescription('Approve a Discord user as a dashboard tester.')
+            .setDescription('Approve a Discord user as a Firesong Herald dashboard tester.')
             .addUserOption(opt =>
                 opt
                     .setName('user')
@@ -30,18 +30,18 @@ export const data = new SlashCommandBuilder()
     .addSubcommand(sub =>
         sub
             .setName('remove-tester')
-            .setDescription('Revoke dashboard tester access from a user.')
+            .setDescription('Revoke a user\'s access to the Firesong Herald dashboard.')
             .addUserOption(opt =>
                 opt
                     .setName('user')
-                    .setDescription('The user to revoke tester access from.')
+                    .setDescription('The user to revoke dashboard access from.')
                     .setRequired(true)
             )
     )
     .addSubcommand(sub =>
         sub
             .setName('approve-server')
-            .setDescription('Approve a Discord server for bot testing.')
+            .setDescription('Approve a Discord server for Firesong Herald bot testing.')
             .addStringOption(opt =>
                 opt
                     .setName('server_id')
@@ -52,7 +52,7 @@ export const data = new SlashCommandBuilder()
     .addSubcommand(sub =>
         sub
             .setName('revoke-server')
-            .setDescription('Revoke bot testing approval from a Discord server.')
+            .setDescription('Revoke a Discord server from Firesong Herald bot testing.')
             .addStringOption(opt =>
                 opt
                     .setName('server_id')
@@ -84,13 +84,13 @@ function getMemberRoleIds(interaction: ChatInputCommandInteraction): string[] {
 
 /**
  * Handles the /admin command and its subcommands.
- * Restricted to users holding a registered admin role in this server.
+ * Restricted to users holding a registered admin role in Firesong Herald for this server.
  *
  * Subcommands:
- *   add-tester     — Approves a Discord user as a dashboard tester
- *   remove-tester  — Revokes dashboard tester access from a user
- *   approve-server — Approves a Discord server for bot testing
- *   revoke-server  — Revokes bot testing approval from a Discord server
+ *   add-tester     — Approves a Discord user as a Firesong Herald dashboard tester
+ *   remove-tester  — Revokes a user's access to the Firesong Herald dashboard
+ *   approve-server — Approves a Discord server for Firesong Herald bot testing
+ *   revoke-server  — Revokes a Discord server from Firesong Herald bot testing
  *
  * @param interaction - The slash command interaction.
  */
@@ -114,7 +114,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
                     new EmbedBuilder()
                         .setColor(Colours.error)
                         .setTitle('Access denied')
-                        .setDescription('You do not have admin permissions in this server.'),
+                        .setDescription('You do not have admin access to Firesong Herald for this server.'),
                 ],
                 ephemeral: true,
             });
@@ -148,7 +148,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
                     new EmbedBuilder()
                         .setColor(Colours.admin)
                         .setTitle('Tester approved')
-                        .setDescription(`<@${user.id}> has been approved as a dashboard tester.`)
+                        .setDescription(`<@${user.id}> has been approved as a Firesong Herald dashboard tester.`)
                         .setFooter({ text: `Actioned by ${interaction.user.username}` })
                         .setTimestamp(),
                 ],
@@ -160,7 +160,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
                         new EmbedBuilder()
                             .setColor(Colours.error)
                             .setTitle('Already a tester')
-                            .setDescription(`<@${user.id}> is already approved as a tester.`),
+                            .setDescription(`<@${user.id}> is already approved as a Firesong Herald dashboard tester.`),
                     ],
                 });
                 return;
@@ -191,7 +191,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
                     new EmbedBuilder()
                         .setColor(Colours.admin)
                         .setTitle('Tester removed')
-                        .setDescription(`<@${user.id}> no longer has dashboard tester access.`)
+                        .setDescription(`<@${user.id}> no longer has access to the Firesong Herald dashboard.`)
                         .setFooter({ text: `Actioned by ${interaction.user.username}` })
                         .setTimestamp(),
                 ],
@@ -203,7 +203,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
                         new EmbedBuilder()
                             .setColor(Colours.error)
                             .setTitle('Not found')
-                            .setDescription(`<@${user.id}> is not currently approved as a tester.`),
+                            .setDescription(`<@${user.id}> is not currently approved as a Firesong Herald dashboard tester.`),
                     ],
                 });
                 return;
@@ -234,7 +234,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
                     new EmbedBuilder()
                         .setColor(Colours.admin)
                         .setTitle('Server approved')
-                        .setDescription(`Server \`${serverId}\` has been approved for bot testing.`)
+                        .setDescription(`Server \`${serverId}\` has been approved for Firesong Herald bot testing.`)
                         .setFooter({ text: `Actioned by ${interaction.user.username}` })
                         .setTimestamp(),
                 ],
@@ -246,7 +246,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
                         new EmbedBuilder()
                             .setColor(Colours.error)
                             .setTitle('Already approved')
-                            .setDescription(`Server \`${serverId}\` is already approved for bot testing.`),
+                            .setDescription(`Server \`${serverId}\` is already approved for Firesong Herald bot testing.`),
                     ],
                 });
                 return;
@@ -277,7 +277,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
                     new EmbedBuilder()
                         .setColor(Colours.admin)
                         .setTitle('Server approval revoked')
-                        .setDescription(`Server \`${serverId}\` has been removed from the approved testing list.`)
+                        .setDescription(`Server \`${serverId}\` has been removed from Firesong Herald bot testing.`)
                         .setFooter({ text: `Actioned by ${interaction.user.username}` })
                         .setTimestamp(),
                 ],
@@ -289,7 +289,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
                         new EmbedBuilder()
                             .setColor(Colours.error)
                             .setTitle('Not found')
-                            .setDescription(`Server \`${serverId}\` is not currently approved for bot testing.`),
+                            .setDescription(`Server \`${serverId}\` is not currently approved for Firesong Herald bot testing.`),
                     ],
                 });
                 return;

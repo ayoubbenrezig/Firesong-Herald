@@ -19,22 +19,22 @@ export const data = new SlashCommandBuilder()
     .addSubcommand(sub =>
         sub
             .setName('add-admin-role')
-            .setDescription('Grant a role admin permissions in this server.')
+            .setDescription('Grant a role admin access to Firesong Herald for this server.')
             .addRoleOption(opt =>
                 opt
                     .setName('role')
-                    .setDescription('The role to grant admin permissions.')
+                    .setDescription('The role to grant admin access.')
                     .setRequired(true)
             )
     )
     .addSubcommand(sub =>
         sub
             .setName('remove-admin-role')
-            .setDescription('Revoke admin permissions from a role in this server.')
+            .setDescription('Revoke a role\'s admin access to Firesong Herald for this server.')
             .addRoleOption(opt =>
                 opt
                     .setName('role')
-                    .setDescription('The role to revoke admin permissions from.')
+                    .setDescription('The role to revoke admin access from.')
                     .setRequired(true)
             )
     );
@@ -48,8 +48,8 @@ export const data = new SlashCommandBuilder()
  * Restricted to the guild owner only.
  *
  * Subcommands:
- *   add-admin-role    — Grants a Discord role admin permissions in this server
- *   remove-admin-role — Revokes admin permissions from a Discord role
+ *   add-admin-role    — Grants a Discord role admin access to Firesong Herald for this server
+ *   remove-admin-role — Revokes a Discord role's admin access to Firesong Herald for this server
  *
  * @param interaction - The slash command interaction.
  */
@@ -89,7 +89,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
                     new EmbedBuilder()
                         .setColor(Colours.owner)
                         .setTitle('Admin role added')
-                        .setDescription(`<@&${role.id}> has been granted admin permissions in this server.`)
+                        .setDescription(`<@&${role.id}> has been granted admin access to Firesong Herald for this server.`)
                         .setFooter({ text: `Actioned by ${interaction.user.username}` })
                         .setTimestamp(),
                 ],
@@ -101,7 +101,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
                         new EmbedBuilder()
                             .setColor(Colours.error)
                             .setTitle('Already registered')
-                            .setDescription(`<@&${role.id}> already has admin permissions in this server.`),
+                            .setDescription(`<@&${role.id}> already has admin access to Firesong Herald in this server.`),
                     ],
                 });
                 return;
@@ -129,7 +129,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
                     new EmbedBuilder()
                         .setColor(Colours.owner)
                         .setTitle('Admin role removed')
-                        .setDescription(`<@&${role.id}> no longer has admin permissions in this server.`)
+                        .setDescription(`<@&${role.id}> no longer has admin access to Firesong Herald for this server.`)
                         .setFooter({ text: `Actioned by ${interaction.user.username}` })
                         .setTimestamp(),
                 ],
@@ -141,7 +141,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
                         new EmbedBuilder()
                             .setColor(Colours.error)
                             .setTitle('Not found')
-                            .setDescription(`<@&${role.id}> does not have admin permissions in this server.`),
+                            .setDescription(`<@&${role.id}> does not have admin access to Firesong Herald in this server.`),
                     ],
                 });
                 return;
