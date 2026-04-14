@@ -1,0 +1,62 @@
+name: Pull Requests
+
+on:
+  pull_request:
+    types: [opened, closed, reopened, ready_for_review]
+
+jobs:
+  notify:
+    name: Notify Discord
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set embed metadata
+        id: meta
+        run: |
+          ACTION="${{ github.event.action }}"
+          MERGED="${{ github.event.pull_request.merged }}"
+          if [ "$ACTION" = "opened" ]; then
+            echo "color=5763719" >> $GITHUB_OUTPUT
+            echo "icon=🟢" >> $GITHUB_OUTPUT
+            echo "status=opened" >> $GITHUB_OUTPUT
+          elif [ "$ACTION" = "closed" ] && [ "$MERGED" = "true" ]; then
+            echo "color=10181046" >> $GITHUB_OUTPUT
+            echo "icon=🟣" >> $GITHUB_OUTPUT
+            echo "status=merged" >> $GITHUB_OUTPUT
+          elif [ "$ACTION" = "closed" ]; then
+            echo "color=15548997" >> $GITHUB_OUTPUT
+            echo "icon=🔴" >> $GITHUB_OUTPUT
+            echo "status=closed" >> $GITHUB_OUTPUT
+          elif [ "$ACTION" = "reopened" ]; then
+            echo "color=16776960" >> $GITHUB_OUTPUT
+            echo "icon=🟡" >> $GITHUB_OUTPUT
+            echo "status=reopened" >> $GITHUB_OUTPUT
+          else
+            echo "color=3447003" >> $GITHUB_OUTPUT
+            echo "icon=🔵" >> $GITHUB_OUTPUT
+            echo "status=ready for review" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Notify Discord
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d '{
+              "embeds": [{
+                "title": "${{ steps.meta.outputs.icon }} PR #${{ github.event.pull_request.number }} ${{ steps.meta.outputs.status }}",
+                "description": "**[${{ github.event.pull_request.title }}](${{ github.event.pull_request.html_url }})**",
+                "color": ${{ steps.meta.outputs.color }},
+                "fields": [
+                  {
+                    "name": "Author",
+                    "value": "${{ github.event.pull_request.user.login }}",
+                    "inline": true
+                  },
+                  {
+                    "name": "Branch",
+                    "value": "`${{ github.event.pull_request.head.ref }}` → `${{ github.event.pull_request.base.ref }}`",
+                    "inline": true
+                  }
+                ]
+              }]
+            }' \
+            ${{ secrets.DISCORD_WEBHOOK_PRS }}
