@@ -85,7 +85,7 @@ export async function createEvent(input: CreateEventInput): Promise<EventWithOpt
     validateCreateEventInput(input);
 
     try {
-        return await prisma.$transaction(async (tx) => {
+        return await prisma.$transaction(async (tx: typeof prisma) => {
             return tx.event.create({
                 data: {
                     discordServerId: input.discordServerId,
