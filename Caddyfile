@@ -1,60 +1,70 @@
 # Global directive ordering
 {
-    order rate_limit before basicauth
+	order rate_limit before basicauth
 }
 
 # Production site configuration
 firesongherald.com, www.firesongherald.com {
+	# Authentication routes: strict rate limiting (10 events per minute)
+	handle /auth/* {
+		rate_limit {
+			zone auth_zone {
+				key {http.request.remote_ip}
+				events 10
+				window 1m
+			}
+		}
+		reverse_proxy api:3000
+	}
 
-    # Authentication routes: strict rate limiting (10 events per minute)
-    handle /api/auth/* {
-        rate_limit {
-            zone auth_zone {
-                key {http.request.remote_ip}
-                events 10
-                window 1m
-            }
-        }
-        uri strip_prefix /api
-        reverse_proxy api:3000
-    }
+	handle /api/auth/* {
+		rate_limit {
+			zone auth_zone_api {
+				key {http.request.remote_ip}
+				events 10
+				window 1m
+			}
+		}
+		uri strip_prefix /api
+		reverse_proxy api:3000
+	}
 
-    # API routes: moderate rate limiting (60 events per minute)
-    handle /api/* {
-        rate_limit {
-            zone api_zone {
-                key {http.request.remote_ip}
-                events 60
-                window 1m
-            }
-        }
-        uri strip_prefix /api
-        reverse_proxy api:3000
-    }
+	# API routes: moderate rate limiting (60 events per minute)
+	handle /api/* {
+		rate_limit {
+			zone api_zone {
+				key {http.request.remote_ip}
+				events 60
+				window 1m
+			}
+		}
+		uri strip_prefix /api
+		reverse_proxy api:3000
+	}
 
-    # WebSocket connections: no rate limiting required
-    handle /ws/* {
-        reverse_proxy api:3000
-    }
+	# WebSocket connections: no rate limiting required
+	handle /ws/* {
+		reverse_proxy api:3000
+	}
 
-    # Dashboard and other routes: standard rate limiting (60 events per minute)
-    handle /* {
-        rate_limit {
-            zone global_zone {
-                key {http.request.remote_ip}
-                events 60
-                window 1m
-            }
-        }
-        reverse_proxy dashboard:3001
-    }
+	# Dashboard and other routes: standard rate limiting (60 events per minute)
+	handle /* {
+		rate_limit {
+			zone global_zone {
+				key {http.request.remote_ip}
+				events 60
+				window 1m
+			}
+		}
+		reverse_proxy dashboard:3001
+	}
 
-    # Security headers: enforce HTTPS, prevent clickjacking, enforce content types
-    header {
-        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-        X-Content-Type-Options "nosniff"
-        X-Frame-Options "DENY"
-        Referrer-Policy "strict-origin-when-cross-origin"
-        defer
-    }
+	# Security headers
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		defer
+	}
 }
