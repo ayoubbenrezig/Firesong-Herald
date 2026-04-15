@@ -25,6 +25,9 @@ Thumbs.db
 logs/
 *.log
 
-# Build outputs (if you use TypeScript or bundle your code)
+# Build outputs (TypeScript and bundled code)
 dist/
 build/
+
+# Local development scripts
+*.bat
