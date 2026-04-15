@@ -1,4 +1,6 @@
-import { PrismaClient } from '../../../db/generated/prisma/client.js';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const { PrismaClient } = require('../../../db/generated/prisma/index.js');
 import { PrismaPg } from '@prisma/adapter-pg';
 import { logger } from './logger.js';
 
