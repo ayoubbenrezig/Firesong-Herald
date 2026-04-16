@@ -3,6 +3,7 @@
     import { SunIcon, MoonIcon } from 'phosphor-svelte';
     import { toggleMode } from '$lib/mode';
     import MobileBottomBar from '$lib/components/MobileBottomBar.svelte';
+    import RefreshButton from '$lib/components/RefreshButton.svelte';
 
     const features = [
         {
@@ -64,14 +65,17 @@
 
                 <a href="/login" class="btn preset-filled-primary-500 px-5 py-2 rounded-lg font-medium shadow-lg shadow-primary-500/20">Sign in</a>
             </div>
-            <!-- Mobile theme toggle — visible below 920px only -->
-            <button onclick={handleToggle} class="min-[920px]:hidden cursor-pointer p-1.5 rounded-full hover:bg-white/10 transition-colors" aria-label="Toggle dark mode">
-                {#if dark}
-                    <SunIcon class="size-5" />
-                {:else}
-                    <MoonIcon class="size-5" />
-                {/if}
-            </button>
+            <!-- Mobile controls — visible below 920px only -->
+            <div class="min-[920px]:hidden flex items-center gap-1">
+                <RefreshButton size={5} />
+                <button onclick={handleToggle} class="cursor-pointer p-1.5 rounded-full hover:bg-white/10 transition-colors" aria-label="Toggle dark mode">
+                    {#if dark}
+                        <SunIcon class="size-5" />
+                    {:else}
+                        <MoonIcon class="size-5" />
+                    {/if}
+                </button>
+            </div>
         </div>
     </nav>
 
