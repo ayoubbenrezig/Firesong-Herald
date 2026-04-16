@@ -43,10 +43,10 @@
 <div class="min-h-screen flex flex-col">
 
     <!-- Nav -->
-    <nav class="nav-polished px-6 py-4 sticky top-4 z-50 max-w-5xl mx-auto">
-        <div class="mx-auto flex items-center justify-between">
-            <span class="brand-text text-lg font-bold">Firesong Herald</span>
-            <div class="flex items-center gap-6 text-sm">
+    <nav class="nav-polished px-8 py-5 sticky top-0 z-50 mx-auto">
+        <div class="mx-auto flex items-center justify-between max-w-5xl">
+            <span class="brand-text">Firesong Herald</span>
+            <div class="flex items-center gap-6 text-base">
                 <a href="https://github.com/ayoubbenrezig/Firesong-Herald" target="_blank" rel="noopener noreferrer" class="nav-link">GitHub</a>
                 <a href="/privacy" class="nav-link">Privacy</a>
                 <a href="/tos" class="nav-link">Terms</a>
