@@ -127,7 +127,7 @@
                 <section class="space-y-2"><h3 class="font-semibold text-surface-900 dark:text-surface-100">10. Contact</h3><p>For questions, contact us at <a href="mailto:contact@firesongherald.com" class="underline hover:text-surface-900 dark:hover:text-surface-50">contact@firesongherald.com</a>.</p></section>
             </div>
             <div class="px-8 py-4 border-t border-surface-200 dark:border-surface-800 shrink-0 flex justify-end">
-                <button type="button" onclick={closeModal} class="px-4 py-2 rounded-md text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white transition-colors">Close</button>
+                <button type="button" onclick={closeModal} class="btn preset-filled-primary-500 px-4 py-2 rounded-md text-sm font-medium">Read & Accept</button>
             </div>
         </div>
     </div>
@@ -161,7 +161,7 @@
                 <section class="space-y-2"><h3 class="font-semibold text-surface-900 dark:text-surface-100">9. Security</h3><p>All data is transmitted over HTTPS. Session cookies are signed, httpOnly, and scoped to this domain.</p></section>
             </div>
             <div class="px-8 py-4 border-t border-surface-200 dark:border-surface-800 shrink-0 flex justify-end">
-                <button type="button" onclick={closeModal} class="px-4 py-2 rounded-md text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white transition-colors">Close</button>
+                <button type="button" onclick={closeModal} class="btn preset-filled-primary-500 px-4 py-2 rounded-md text-sm font-medium">Read & Accept</button>
             </div>
         </div>
     </div>
