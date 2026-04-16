@@ -316,6 +316,7 @@ h2 {
 .mobile-info-desc {
     font-size: 0.75rem;
     opacity: 0.6;
+    white-space: pre-line;
 }
 
 [data-mode="light"] .mobile-bottom-inner,
@@ -324,6 +325,52 @@ h2 {
     background-color: color-mix(in oklab, var(--color-surface-100), transparent);
     border-color: color-mix(in oklab, var(--color-surface-400) 20%, transparent);
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+.mobile-info-desc--body {
+    opacity: 0.8;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.mobile-install-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    width: 100%;
+}
+
+.mobile-install-btn {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.2s ease;
+}
+
+.mobile-install-btn--cancel {
+    background-color: color-mix(in oklab, var(--color-surface-500) 20%, transparent);
+    opacity: 0.7;
+}
+
+.mobile-install-btn--cancel:hover {
+    opacity: 1;
+}
+
+.mobile-install-btn--confirm {
+    background-color: var(--color-primary-500);
+    color: white;
+}
+
+.mobile-install-btn--confirm:hover {
+    filter: brightness(1.1);
+}
+
+[data-mode="light"] .mobile-install-btn--cancel {
+    background-color: color-mix(in oklab, var(--color-surface-400) 20%, transparent);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
