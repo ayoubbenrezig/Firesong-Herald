@@ -2,7 +2,7 @@ name: Server Auto-Update
 
 on:
   schedule:
-    - cron: '0 3 * * 0' # Every Sunday at 3am UTC
+    - cron: '0 7 * * *' # Daily at 7am UTC
   workflow_dispatch:
 
 jobs:
@@ -19,34 +19,75 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            sudo apt update -qq || exit 1
-            sudo apt upgrade -y -qq || exit 1
-            if [ -f /var/run/reboot-required ]; then
-              echo "REBOOT_REQUIRED=true" >> /tmp/update_status
-            else
-              echo "REBOOT_REQUIRED=false" >> /tmp/update_status
-            fi
-            cat /tmp/update_status
-            rm -f /tmp/update_status
+            set -euo pipefail
 
-      - name: Check reboot status
-        id: reboot
-        uses: appleboy/ssh-action@v1.2.1
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            if [ -f /var/run/reboot-required ]; then
-              echo "true"
-            else
-              echo "false"
+            echo "--- Starting package update ---"
+
+            if ! sudo apt update -qq 2>&1; then
+              echo "ERROR: apt update failed"
+              exit 1
             fi
 
-      - name: Notify Discord — no reboot needed
-        if: success() && steps.reboot.outputs.stdout != 'true'
+            UPGRADABLE=$(apt list --upgradable 2>/dev/null | grep -c upgradable || true)
+
+            if [ "$UPGRADABLE" -le 1 ]; then
+              echo "status=no-updates"
+              exit 0
+            fi
+
+            echo "Packages to upgrade: $UPGRADABLE"
+
+            if ! sudo apt upgrade -y -qq 2>&1; then
+              echo "ERROR: apt upgrade failed"
+              exit 1
+            fi
+
+            if [ -f /var/run/reboot-required ]; then
+              echo "status=reboot-required"
+            else
+              echo "status=updated"
+            fi
+
+      - name: Parse update status
+        id: status
         run: |
-          curl -H "Content-Type: application/json" \
+          OUTPUT="${{ steps.upgrade.outputs.stdout }}"
+          echo "$OUTPUT"
+
+          if echo "$OUTPUT" | grep -q "status=no-updates"; then
+            echo "result=no-updates" >> $GITHUB_OUTPUT
+          elif echo "$OUTPUT" | grep -q "status=reboot-required"; then
+            echo "result=reboot-required" >> $GITHUB_OUTPUT
+          elif echo "$OUTPUT" | grep -q "status=updated"; then
+            echo "result=updated" >> $GITHUB_OUTPUT
+          else
+            echo "result=unknown" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Notify Discord — no updates
+        if: success() && steps.status.outputs.result == 'no-updates'
+        run: |
+          curl -fsSL -H "Content-Type: application/json" \
+            -d '{
+              "embeds": [{
+                "title": "🟢 Server Check",
+                "description": "Daily update check completed.",
+                "color": 5763719,
+                "fields": [
+                  {
+                    "name": "Status",
+                    "value": "✅ No updates available",
+                    "inline": false
+                  }
+                ]
+              }]
+            }' \
+            ${{ secrets.DISCORD_WEBHOOK_SERVER }}
+
+      - name: Notify Discord — updated, no reboot
+        if: success() && steps.status.outputs.result == 'updated'
+        run: |
+          curl -fsSL -H "Content-Type: application/json" \
             -d '{
               "embeds": [{
                 "title": "🔧 Server Updated",
@@ -63,10 +104,10 @@ jobs:
             }' \
             ${{ secrets.DISCORD_WEBHOOK_SERVER }}
 
-      - name: Notify Discord — reboot required
-        if: success() && steps.reboot.outputs.stdout == 'true'
+      - name: Notify Discord — updated, reboot required
+        if: success() && steps.status.outputs.result == 'reboot-required'
         run: |
-          curl -H "Content-Type: application/json" \
+          curl -fsSL -H "Content-Type: application/json" \
             -d '{
               "embeds": [{
                 "title": "🔧 Server Updated",
@@ -91,11 +132,11 @@ jobs:
       - name: Notify Discord on failure
         if: failure()
         run: |
-          curl -H "Content-Type: application/json" \
+          curl -fsSL -H "Content-Type: application/json" \
             -d '{
               "embeds": [{
                 "title": "💥 Server Update Failed",
-                "description": "Weekly package update encountered an error. Manual intervention required.",
+                "description": "Daily package update encountered an error. Manual intervention required.",
                 "color": 15548997,
                 "fields": [
                   {
