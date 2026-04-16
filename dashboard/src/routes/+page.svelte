@@ -2,6 +2,7 @@
     import { browser } from '$app/environment';
     import { SunIcon, MoonIcon } from 'phosphor-svelte';
     import { toggleMode } from '$lib/mode';
+    import MobileBottomBar from '$lib/components/MobileBottomBar.svelte';
 
     const features = [
         {
@@ -43,10 +44,11 @@
 <div class="min-h-screen flex flex-col">
 
     <!-- Nav -->
-    <nav class="nav-polished px-6 py-4 sticky top-4 z-50 max-w-5xl mx-auto">
-        <div class="mx-auto flex items-center justify-between">
-            <span class="brand-text text-lg font-bold">Firesong Herald</span>
-            <div class="flex items-center gap-6 text-sm">
+    <nav class="nav-polished px-8 py-5 sticky top-0 z-50 mx-auto">
+        <div class="mx-auto flex items-center justify-between max-w-5xl">
+            <span class="brand-text">Firesong Herald</span>
+            <!-- Desktop links — hidden below 920px -->
+            <div class="hidden min-[920px]:flex items-center gap-6 text-base">
                 <a href="https://github.com/ayoubbenrezig/Firesong-Herald" target="_blank" rel="noopener noreferrer" class="nav-link">GitHub</a>
                 <a href="/privacy" class="nav-link">Privacy</a>
                 <a href="/tos" class="nav-link">Terms</a>
@@ -62,6 +64,14 @@
 
                 <a href="/login" class="btn preset-filled-primary-500 px-5 py-2 rounded-lg font-medium shadow-lg shadow-primary-500/20">Sign in</a>
             </div>
+            <!-- Mobile theme toggle — visible below 920px only -->
+            <button onclick={handleToggle} class="min-[920px]:hidden cursor-pointer p-1.5 rounded-full hover:bg-white/10 transition-colors" aria-label="Toggle dark mode">
+                {#if dark}
+                    <SunIcon class="size-5" />
+                {:else}
+                    <MoonIcon class="size-5" />
+                {/if}
+            </button>
         </div>
     </nav>
 
@@ -99,7 +109,7 @@
     </section>
 
     <!-- Footer -->
-    <footer class="border-t border-surface-200 dark:border-surface-800 px-6 py-6 text-center text-sm text-surface-500 mt-auto">
+    <footer class="border-t border-surface-200 dark:border-surface-800 px-6 py-6 text-center text-sm text-surface-500 mt-auto min-[920px]:pb-6 pb-28">
         <div class="flex flex-wrap justify-center gap-4">
             <a href="/privacy" class="hover:underline">Privacy Policy</a>
             <a href="/tos" class="hover:underline">Terms of Service</a>
@@ -107,5 +117,7 @@
         </div>
         <p class="mt-3">© {new Date().getFullYear()} Firesong Herald. Open source under AGPL-3.0.</p>
     </footer>
+
+    <MobileBottomBar />
 
 </div>

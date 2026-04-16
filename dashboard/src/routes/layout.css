@@ -50,29 +50,27 @@
  */
 
 .nav-polished {
-    margin-top: 1rem;
-    margin-left: 1rem;
-    margin-right: 1rem;
-    border-radius: 1rem;
-    background-color: color-mix(in oklab, var(--color-surface-950) 60%, transparent);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid color-mix(in oklab, var(--color-surface-500) 15%, transparent);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    box-sizing: border-box;
+    background-color: color-mix(in oklab, var(--color-surface-950) 75%, transparent);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid color-mix(in oklab, var(--color-primary-500) 10%, transparent);
+    box-shadow:
+            0 0 0 1px color-mix(in oklab, var(--color-primary-500) 8%, transparent),
+            0 4px 24px rgba(0, 0, 0, 0.35),
+            inset 0 1px 0 0 color-mix(in oklab, var(--color-primary-400) 15%, transparent);
     transition: all 0.3s ease;
 }
 
 .nav-polished:hover {
-    border-color: color-mix(in oklab, var(--color-surface-500) 30%, transparent);
+    box-shadow:
+            0 0 0 1px color-mix(in oklab, var(--color-primary-500) 15%, transparent),
+            0 4px 32px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 0 color-mix(in oklab, var(--color-primary-400) 25%, transparent);
 }
 
-nav {
-    margin-left: auto !important;
-    margin-right: auto !important;
-    width: 100%;
-    max-width: 64rem;
-    border-right: 1px solid color-mix(in oklab, var(--color-surface-500) 20%, transparent);
-}
+
 
 .nav-link {
     @apply transition-all duration-200 opacity-70 font-medium;
@@ -180,12 +178,152 @@ h2 {
  */
 
 .brand-text {
-    @apply font-black tracking-tighter text-xl;
+    @apply font-black tracking-tighter text-3xl;
     background: linear-gradient(135deg, var(--color-primary-300) 0%, var(--color-secondary-300) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     filter: drop-shadow(0 0 16px color-mix(in oklab, var(--color-primary-400) 60%, transparent));
     text-shadow: none;
+    user-select: none;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * MOBILE BOTTOM BAR
+ * ─────────────────────────────────────────────────────────────────────────
+ */
+
+.mobile-bottom-bar {
+    position: fixed;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 2.5rem);
+    max-width: 480px;
+    z-index: 50;
+}
+
+.mobile-bottom-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0.75rem 1.25rem;
+    border-radius: 1.25rem;
+    background-color: color-mix(in oklab, var(--color-surface-950) 80%, transparent);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid color-mix(in oklab, var(--color-primary-500) 20%, transparent);
+    box-shadow:
+            0 4px 24px rgba(0, 0, 0, 0.35),
+            inset 0 1px 0 0 color-mix(in oklab, var(--color-primary-400) 12%, transparent);
+}
+
+.mobile-bar-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border-radius: 0.75rem;
+    opacity: 0.7;
+    transition: opacity 0.2s ease, background-color 0.2s ease;
+    color: currentColor;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.mobile-bar-btn:hover {
+    opacity: 1;
+    background-color: color-mix(in oklab, var(--color-primary-500) 15%, transparent);
+}
+
+.mobile-menu-popup {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 1.25rem;
+    background-color: color-mix(in oklab, var(--color-surface-950) 80%, transparent);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid color-mix(in oklab, var(--color-primary-500) 20%, transparent);
+    box-shadow:
+            0 4px 24px rgba(0, 0, 0, 0.35),
+            inset 0 1px 0 0 color-mix(in oklab, var(--color-primary-400) 12%, transparent);
+}
+
+.mobile-info-popup {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    padding: 1rem 1.25rem;
+    border-radius: 1.25rem;
+    background-color: color-mix(in oklab, var(--color-surface-950) 80%, transparent);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid color-mix(in oklab, var(--color-primary-500) 20%, transparent);
+    box-shadow:
+            0 4px 24px rgba(0, 0, 0, 0.35),
+            inset 0 1px 0 0 color-mix(in oklab, var(--color-primary-400) 12%, transparent);
+}
+
+.mobile-menu-link {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.mobile-menu-link:hover {
+    opacity: 1;
+    color: var(--color-primary-400);
+}
+
+.mobile-info-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    opacity: 0.5;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.mobile-info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.mobile-info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.mobile-info-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.mobile-info-desc {
+    font-size: 0.75rem;
+    opacity: 0.6;
+}
+
+[data-mode="light"] .mobile-bottom-inner,
+[data-mode="light"] .mobile-menu-popup,
+[data-mode="light"] .mobile-info-popup {
+    background-color: color-mix(in oklab, var(--color-surface-100), transparent);
+    border-color: color-mix(in oklab, var(--color-surface-400) 20%, transparent);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -209,6 +347,14 @@ h2 {
     background: none;
     -webkit-background-clip: unset;
     -webkit-text-fill-color: var(--color-surface-950);
+}
+
+[data-mode="light"] .nav-polished {
+    background-color: color-mix(in oklab, var(--color-surface-100), transparent);
+    border-bottom-color: color-mix(in oklab, var(--color-surface-400) 20%, transparent);
+    box-shadow:
+            0 4px 24px rgba(0, 0, 0, 0.06),
+            inset 0 1px 0 0 color-mix(in oklab, white 60%, transparent);
 }
 
 [data-mode="light"] .brand-text {
