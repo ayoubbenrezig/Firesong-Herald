@@ -27,7 +27,7 @@
             class="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-4"
             role="dialog"
             aria-modal="true"
-            aria-label="Become a Tester"
+            aria-label="Firesong Herald: Open Testing"
     >
         <div class="w-full max-w-lg bg-surface-100 dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800 shadow-2xl flex flex-col max-h-[85vh]">
 
@@ -45,35 +45,31 @@
             </div>
 
             <!-- Body -->
-            <div class="overflow-y-auto px-8 py-6 space-y-4 text-sm text-surface-700 dark:text-surface-300 leading-relaxed">
+            <div class="overflow-y-auto px-8 py-6 space-y-5 text-sm text-surface-700 dark:text-surface-300 leading-relaxed">
 
                 <p>
-                    Firesong Herald is an open-source Discord event management bot built to handle events of any kind,
-                    for any community. I'm looking for two types of testers.
+                    Firesong Herald is an open-source Discord event management bot built to handle events of any kind, for any community.
                 </p>
+
+                <div class="space-y-3">
+                    <p class="font-medium text-surface-900 dark:text-surface-100">Two ways to get involved</p>
+
+                    <div class="space-y-1">
+                        <p class="font-medium text-surface-800 dark:text-surface-200">Dashboard tester</p>
+                        <p>Get access to the web app and explore everything it offers. Being in a server that already has the bot running gives you the full experience.</p>
+                    </div>
+
+                    <div class="space-y-1">
+                        <p class="font-medium text-surface-800 dark:text-surface-200">Server tester</p>
+                        <p>Bring the bot to your own Discord server. Your community can then participate in testing both the bot and the dashboard together.</p>
+                    </div>
+                </div>
 
                 <p>
-                    Dashboard testers get access to the web dashboard and can explore everything it offers. To get the
-                    full experience, you'll need to be part of a Discord server that already has the bot running.
+                    Spots are limited by hosting capacity. To sign up, open a thread in the support forum and my team will take it from there. Got ideas or missing a feature? Reach out.
                 </p>
 
-                <p>
-                    Server testers have their own Discord server and want the bot added to it. Your server becomes a
-                    test environment, and your members can participate in testing both the bot and the dashboard together.
-                </p>
-
-                <p>
-                    Spots are limited by hosting capacity. If you want to get involved, join the support server and open
-                    a thread in the support forum and my team will get you registered from there.
-                </p>
-
-                <p>
-                    If you're missing a feature or have ideas that would make it more useful for your community,
-                    reach out.
-                </p>
-
-                <!-- Contact links -->
-                <div class="space-y-3 pt-2">
+                <div class="space-y-3 pt-1">
                     <a
                             href="https://discord.gg/e8eVQTB24z"
                             target="_blank"
@@ -92,8 +88,8 @@
                     </a>
                 </div>
 
-                <p class="text-surface-500 text-xs pt-2">
-                    Thank you for being part of this. Please wait until a feature is complete before leaving feedback on it. 🙏
+                <p class="text-surface-500 text-xs pt-1">
+                    Please wait until a feature is ready before leaving feedback on it. 🙏
                 </p>
 
             </div>

@@ -173,7 +173,7 @@
                             ></div>
                             <div class="absolute right-0 mt-2 w-44 rounded-xl border border-surface-200 dark:border-surface-800 bg-surface-100 dark:bg-surface-900 shadow-xl z-50 overflow-hidden">
                                 <a
-                                        href="/auth/logout"
+                                        href="/logout"
                                         class="flex items-center gap-2.5 px-4 py-3 text-sm text-surface-700 dark:text-surface-300 hover:bg-surface-200 dark:hover:bg-surface-800 transition-colors"
                                 >
                                     <SignOutIcon class="size-4" />

@@ -27,13 +27,13 @@
             class="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-4"
             role="dialog"
             aria-modal="true"
-            aria-label="Thank you for testing"
+            aria-label="Welcome to the team"
     >
         <div class="w-full max-w-lg bg-surface-100 dark:bg-surface-900 rounded-xl border border-surface-200 dark:border-surface-800 shadow-2xl flex flex-col max-h-[85vh]">
 
             <!-- Header -->
             <div class="flex items-center justify-between px-8 py-5 border-b border-surface-200 dark:border-surface-800 shrink-0">
-                <h2 class="font-semibold text-surface-900 dark:text-surface-50">Thank you for testing 🙏</h2>
+                <h2 class="font-semibold text-surface-900 dark:text-surface-50">Welcome to the team 🎉</h2>
                 <button
                         type="button"
                         onclick={onclose}
@@ -45,21 +45,21 @@
             </div>
 
             <!-- Body -->
-            <div class="overflow-y-auto px-8 py-6 space-y-4 text-sm text-surface-700 dark:text-surface-300 leading-relaxed">
+            <div class="overflow-y-auto px-8 py-6 space-y-5 text-sm text-surface-700 dark:text-surface-300 leading-relaxed">
 
                 <p>
-                    You're registered as a tester — it genuinely means a lot. Your feedback helps shape what Firesong Herald becomes.
+                    You're in. Having you here genuinely means a lot, and your feedback will help shape what Firesong Herald becomes.
                 </p>
 
-                <p>
-                    If you'd like to go further and test the bot on your own Discord server, you can do that too. Your server would become a test environment, and your members can participate in testing both the bot and the dashboard together.
-                </p>
+                <div class="space-y-2">
+                    <p class="font-medium text-surface-900 dark:text-surface-100">Want to go further?</p>
+                    <p>
+                        If you bring the bot to your own Discord server, your whole community can join in on testing too.
+                        The process is the same as signing up. Open a thread in the support forum and my team will get you sorted.
+                    </p>
+                </div>
 
-                <p>
-                    To register a server for testing, the process is the same — join the support server and open a thread in the support forum. My team will get you sorted from there.
-                </p>
-
-                <div class="pt-2">
+                <div class="pt-1">
                     <a
                             href="https://discord.gg/e8eVQTB24z"
                             target="_blank"
