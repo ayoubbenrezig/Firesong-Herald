@@ -10,6 +10,7 @@ import { logger } from './lib/logger.js';
 import { healthRoutes } from './routes/health.js';
 import { authRoutes } from './routes/auth.js';
 import { testerRoutes } from './routes/testers.js';
+import { configRoutes } from './routes/config.js';
 
 // Load .env from project root
 const __filename = fileURLToPath(import.meta.url);
@@ -86,6 +87,7 @@ async function buildServer(): Promise<ReturnType<typeof Fastify>> {
     await app.register(healthRoutes);
     await app.register(authRoutes);
     await app.register(testerRoutes);
+    await app.register(configRoutes);
 
     return app;
 }

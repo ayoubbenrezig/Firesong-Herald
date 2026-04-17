@@ -18,6 +18,7 @@
                 globalName: string | null;
             } | null;
             isTester: boolean;
+            botInviteUrl: string | null;
         };
     }
 
@@ -25,6 +26,7 @@
 
     const user = $derived(data.user);
     const isTester = $derived(data.isTester);
+    const botInviteUrl = $derived(data.botInviteUrl);
 
     // ── Feature cards ─────────────────────────────────────────────────────────
 
@@ -105,10 +107,6 @@
     function closeThankYouModal(): void {
         thankYouModalOpen = false;
     }
-
-    // ── Bot invite ────────────────────────────────────────────────────────────
-    // TODO: finalise permissions integer before public launch.
-    const BOT_INVITE_URL = 'https://discord.com/oauth2/authorize?client_id=1480999419275907122&scope=bot+applications.commands&permissions=277025459200';
 </script>
 
 <svelte:head>
@@ -236,14 +234,16 @@
 
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
             {#if user && isTester}
-                <a
-                        href={BOT_INVITE_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="btn preset-filled-primary-500 px-6 py-3 rounded-md font-medium"
-                >
-                    Add to Server
-                </a>
+                {#if botInviteUrl}
+                    <a
+                            href={botInviteUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="btn preset-filled-primary-500 px-6 py-3 rounded-md font-medium"
+                    >
+                        Add to Server
+                    </a>
+                {/if}
                 <a href="/app" class="btn preset-outlined-surface-500 px-6 py-3 rounded-md font-medium">
                     Open Dashboard
                 </a>
@@ -292,7 +292,13 @@
         <p class="mt-3">© {new Date().getFullYear()} Firesong Herald. Open source under AGPL-3.0.</p>
     </footer>
 
-    <MobileBottomBar />
+    <MobileBottomBar
+            {user}
+            {isTester}
+            {botInviteUrl}
+            onBecomeTester={openTesterModal}
+            onThankYou={openThankYouModal}
+    />
 
 </div>
 
