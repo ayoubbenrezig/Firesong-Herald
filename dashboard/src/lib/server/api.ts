@@ -7,8 +7,6 @@
 
 const API_URL = process.env.API_URL ?? 'http://localhost:3001';
 
-console.log('[api] API_URL:', process.env.API_URL);
-
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -46,5 +44,32 @@ export async function checkIsTester(discordUserId: string): Promise<boolean> {
     } catch (error) {
         console.error('[api] checkIsTester error:', error instanceof Error ? error.message : error);
         return false;
+    }
+}
+
+export interface BotInviteResult {
+    botInviteUrl: string | null;
+}
+
+/**
+ * Fetches the Discord bot invite URL from the API.
+ * Returns null on any error.
+ *
+ * @returns The bot invite URL, or null if not configured or on error.
+ */
+export async function getBotInviteUrl(): Promise<string | null> {
+    try {
+        const response = await fetch(`${API_URL}/config/bot-invite`);
+
+        if (!response.ok) {
+            console.error(`[api] getBotInviteUrl failed: ${response.status} ${response.statusText}`);
+            return null;
+        }
+
+        const data = await response.json() as BotInviteResult;
+        return data.botInviteUrl ?? null;
+    } catch (error) {
+        console.error('[api] getBotInviteUrl error:', error instanceof Error ? error.message : error);
+        return null;
     }
 }
