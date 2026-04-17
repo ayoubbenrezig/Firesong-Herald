@@ -3,6 +3,7 @@ import oauth2, { type OAuth2Namespace } from '@fastify/oauth2';
 import cookie from '@fastify/cookie';
 import jwt from '@fastify/jwt';
 import rateLimit from '@fastify/rate-limit';
+import { prisma } from '../lib/prisma.js';
 
 // ============================================================================
 // TYPE AUGMENTATION
@@ -34,7 +35,8 @@ interface DiscordUser {
  *
  * Routes:
  *   GET /auth/discord          — Redirects to Discord OAuth2 authorisation page
- *   GET /auth/discord/callback — Handles Discord callback, signs JWT, sets cookie
+ *   GET /auth/discord/callback — Handles Discord callback, upserts user record,
+ *                                signs JWT, sets cookie, and redirects to dashboard
  *   GET /auth/logout           — Clears session cookie
  */
 export async function authRoutes(app: FastifyInstance): Promise<void> {
@@ -91,14 +93,21 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
 
     /**
      * Handles the Discord OAuth2 callback.
-     * Exchanges the authorisation code for an access token, fetches the Discord
-     * user, signs a JWT, sets it as an httpOnly session cookie, and redirects
-     * to the dashboard.
+     *
+     * Flow:
+     *   1. Exchanges the authorisation code for a Discord access token.
+     *   2. Fetches the authenticated Discord user's profile.
+     *   3. Upserts a User record in the database, updating lastActiveAt on each sign-in.
+     *   4. Signs a JWT containing the user's Discord identity.
+     *   5. Sets the JWT as an httpOnly session cookie and redirects to the dashboard.
+     *
+     * On any failure, redirects to the login page with an appropriate error code.
      */
     app.get('/auth/discord/callback', async function (request, reply) {
         try {
             const { token } = await app.discordOAuth2.getAccessTokenFromAuthorizationCodeFlow(request);
 
+            // ── Fetch Discord user profile ────────────────────────────────────
             const userResponse = await fetch('https://discord.com/api/users/@me', {
                 headers: {
                     Authorization: `Bearer ${token.access_token}`,
@@ -106,12 +115,39 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
             });
 
             if (!userResponse.ok) {
-                app.log.error({ status: userResponse.status }, 'Failed to fetch Discord user');
+                app.log.error(
+                    { status: userResponse.status },
+                    'Failed to fetch Discord user profile during OAuth callback',
+                );
                 return reply.redirect(`${DASHBOARD_URL}/login?error=discord_user_fetch_failed`);
             }
 
             const user = await userResponse.json() as DiscordUser;
 
+            // ── Upsert user record ────────────────────────────────────────────
+            // Creates the record on first sign-in; updates lastActiveAt on subsequent ones.
+            // dmConsent and other preferences are left unchanged on update.
+            try {
+                await prisma.user.upsert({
+                    where: { discordUserId: user.id },
+                    create: {
+                        discordUserId: user.id,
+                        dmConsent: true,
+                        dmConsentGivenAt: new Date(),
+                        lastActiveAt: new Date(),
+                    },
+                    update: {
+                        lastActiveAt: new Date(),
+                    },
+                });
+
+                app.log.info({ discordUserId: user.id }, 'User record upserted on sign-in');
+            } catch (dbError) {
+                // Log but do not block sign-in — a failed upsert should not deny access.
+                app.log.error({ err: dbError, discordUserId: user.id }, 'Failed to upsert user record on sign-in');
+            }
+
+            // ── Sign session JWT ──────────────────────────────────────────────
             const sessionToken = await reply.jwtSign({
                 discordId: user.id,
                 username: user.username,
