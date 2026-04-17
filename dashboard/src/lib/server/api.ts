@@ -1,0 +1,50 @@
+// ============================================================================
+// SERVER-SIDE API CLIENT
+// ============================================================================
+// Typed fetch helper for calling the Firesong Herald API from SvelteKit
+// server-side load functions. Forwards the session cookie automatically.
+// Never import this from client-side code.
+
+const API_URL = process.env.API_URL ?? 'http://localhost:3001';
+
+console.log('[api] API_URL:', process.env.API_URL);
+
+// ============================================================================
+// TYPES
+// ============================================================================
+
+export interface TesterCheckResult {
+    isTester: boolean;
+}
+
+// ============================================================================
+// FUNCTIONS
+// ============================================================================
+
+/**
+ * Checks whether a Discord user is a registered tester by querying the API.
+ * Returns false on any error to fail safely — access is denied if unsure.
+ *
+ * @param discordUserId - The Discord snowflake ID of the user to check.
+ * @returns True if the user is a registered tester, false otherwise.
+ */
+export async function checkIsTester(discordUserId: string): Promise<boolean> {
+    try {
+        const response = await fetch(`${API_URL}/testers/${encodeURIComponent(discordUserId)}`);
+
+        if (response.status === 404) {
+            return false;
+        }
+
+        if (!response.ok) {
+            console.error(`[api] checkIsTester failed: ${response.status} ${response.statusText}`);
+            return false;
+        }
+
+        const data = await response.json() as TesterCheckResult;
+        return data.isTester === true;
+    } catch (error) {
+        console.error('[api] checkIsTester error:', error instanceof Error ? error.message : error);
+        return false;
+    }
+}
