@@ -8,10 +8,32 @@
         ListIcon,
         GithubLogoIcon,
         DownloadSimpleIcon,
+        SignOutIcon,
+        TestTubeIcon,
     } from 'phosphor-svelte';
+
+    // ── Props ─────────────────────────────────────────────────────────────────
+
+    interface Props {
+        user: {
+            discordId: string;
+            username: string;
+            avatar: string | null;
+            globalName: string | null;
+        } | null;
+        isTester: boolean;
+        botInviteUrl: string | null;
+        onBecomeTester: () => void;
+        onThankYou: () => void;
+    }
+
+    let { user, isTester, botInviteUrl, onBecomeTester, onThankYou }: Props = $props();
+
+    // ── State ─────────────────────────────────────────────────────────────────
 
     let menuOpen = $state(false);
     let infoOpen = $state(false);
+    let userOpen = $state(false);
     let installPrompt = $state(false);
     let installConfirm = $state(false);
 
@@ -32,20 +54,48 @@
         });
     }
 
-    function toggleMenu(): void {
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    /**
+     * Returns the Discord CDN avatar URL, or a default avatar if none is set.
+     */
+    function avatarUrl(discordId: string, avatar: string | null): string {
+        if (avatar) {
+            return `https://cdn.discordapp.com/avatars/${discordId}/${avatar}.webp?size=64`;
+        }
+        const index = Number(BigInt(discordId) % 6n);
+        return `https://cdn.discordapp.com/embed/avatars/${index}.png`;
+    }
+
+    // ── Toggle functions ──────────────────────────────────────────────────────
+
+    function closeAll(): void {
+        menuOpen = false;
         infoOpen = false;
+        userOpen = false;
         installPrompt = false;
-        menuOpen = !menuOpen;
+    }
+
+    function toggleMenu(): void {
+        const next = !menuOpen;
+        closeAll();
+        menuOpen = next;
     }
 
     function toggleInfo(): void {
-        menuOpen = false;
-        installPrompt = false;
-        infoOpen = !infoOpen;
+        const next = !infoOpen;
+        closeAll();
+        infoOpen = next;
+    }
+
+    function toggleUser(): void {
+        const next = !userOpen;
+        closeAll();
+        userOpen = next;
     }
 
     function openInstallPrompt(): void {
-        menuOpen = false;
+        closeAll();
         installConfirm = false;
         installPrompt = true;
     }
@@ -70,10 +120,12 @@
         }
     }
 
+    // ── Nav info items ────────────────────────────────────────────────────────
+
     const navItems = [
         { icon: HouseIcon, label: 'Home', description: 'Return to the landing page.' },
-        { icon: SquaresFourIcon, label: 'Dashboard', description: 'Open the web dashboard.' },
-        { icon: UserCircleIcon, label: 'Sign in', description: 'Sign in to your account.' },
+        ...(user && isTester ? [{ icon: SquaresFourIcon, label: 'Dashboard', description: 'Open the web dashboard.' }] : []),
+        { icon: UserCircleIcon, label: user ? (user.globalName ?? user.username) : 'Sign in', description: user ? 'Opens account options.' : 'Sign in to your account.' },
         { icon: ListIcon, label: 'More', description: 'Opens GitHub, Privacy, and Terms links.' },
         ...(!isInstalled ? [{ icon: DownloadSimpleIcon, label: 'Add to Home Screen', description: 'Found in the menu (≡).\nAdds Firesong Herald to your home screen for quick access.' }] : []),
     ];
@@ -118,6 +170,34 @@
         </div>
     {/if}
 
+    <!-- User popup -->
+    {#if userOpen && user}
+        <div class="mobile-menu-popup">
+            <div class="mobile-menu-link opacity-60 pointer-events-none text-xs">
+                {user.globalName ?? user.username}
+            </div>
+            {#if isTester}
+                <button onclick={() => { closeAll(); onThankYou(); }} class="mobile-menu-link">
+                    <TestTubeIcon class="size-5" />
+                    <span>You're a tester</span>
+                </button>
+                {#if botInviteUrl}
+                    <a href={botInviteUrl} target="_blank" rel="noopener noreferrer" class="mobile-menu-link">
+                        Add to Server
+                    </a>
+                {/if}
+            {:else}
+                <button onclick={() => { closeAll(); onBecomeTester(); }} class="mobile-menu-link">
+                    Become a Tester
+                </button>
+            {/if}
+            <a href="/logout" class="mobile-menu-link">
+                <SignOutIcon class="size-5" />
+                <span>Sign out</span>
+            </a>
+        </div>
+    {/if}
+
     <!-- Install prompt -->
     {#if installPrompt}
         <div class="mobile-info-popup">
@@ -145,15 +225,46 @@
         <a href="/" class="mobile-bar-btn" aria-label="Home">
             <HouseIcon class="size-6" />
         </a>
-        <a href="/app" class="mobile-bar-btn" aria-label="Dashboard">
-            <SquaresFourIcon class="size-6" />
-        </a>
+
+        {#if user && isTester}
+            <a href="/app" class="mobile-bar-btn" aria-label="Dashboard">
+                <SquaresFourIcon class="size-6" />
+            </a>
+        {:else}
+            <button
+                    type="button"
+                    onclick={() => { closeAll(); user ? onBecomeTester() : onBecomeTester(); }}
+                    class="mobile-bar-btn"
+                    aria-label="Become a tester"
+            >
+                <SquaresFourIcon class="size-6 opacity-30" />
+            </button>
+        {/if}
+
         <button onclick={toggleInfo} class="mobile-bar-btn" aria-label="Navigation info">
             <InfoIcon class="size-6" />
         </button>
-        <a href="/login" class="mobile-bar-btn" aria-label="Sign in">
-            <UserCircleIcon class="size-6" />
-        </a>
+
+        {#if user}
+            <button
+                    type="button"
+                    onclick={toggleUser}
+                    class="mobile-bar-btn"
+                    aria-label="Account"
+                    aria-expanded={userOpen}
+            >
+                <img
+                        src={avatarUrl(user.discordId, user.avatar)}
+                        alt="{user.globalName ?? user.username}'s avatar"
+                        class="size-6 rounded-full"
+                />
+            </button>
+        {:else}
+            <a href="/login" class="mobile-bar-btn" aria-label="Sign in">
+                <UserCircleIcon class="size-6" />
+            </a>
+        {/if}
+
         <button onclick={toggleMenu} class="mobile-bar-btn" aria-label="More">
             <ListIcon class="size-6" />
         </button>

@@ -292,7 +292,13 @@
         <p class="mt-3">© {new Date().getFullYear()} Firesong Herald. Open source under AGPL-3.0.</p>
     </footer>
 
-    <MobileBottomBar />
+    <MobileBottomBar
+            {user}
+            {isTester}
+            {botInviteUrl}
+            onBecomeTester={openTesterModal}
+            onThankYou={openThankYouModal}
+    />
 
 </div>
 
