@@ -9,6 +9,7 @@ import rateLimit from '@fastify/rate-limit';
 import { logger } from './lib/logger.js';
 import { healthRoutes } from './routes/health.js';
 import { authRoutes } from './routes/auth.js';
+import { testerRoutes } from './routes/testers.js';
 
 // Load .env from project root
 const __filename = fileURLToPath(import.meta.url);
@@ -84,6 +85,7 @@ async function buildServer(): Promise<ReturnType<typeof Fastify>> {
     // ── Routes ────────────────────────────────────────────────────────────────
     await app.register(healthRoutes);
     await app.register(authRoutes);
+    await app.register(testerRoutes);
 
     return app;
 }

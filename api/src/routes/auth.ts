@@ -141,6 +141,6 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
      */
     app.get('/auth/logout', async function (_request, reply) {
         reply.clearCookie('session', { path: '/' });
-        return reply.redirect(`${DASHBOARD_URL}/login`);
+        return reply.redirect(`${DASHBOARD_URL}/`);
     });
 }
