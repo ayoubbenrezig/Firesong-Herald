@@ -4,6 +4,7 @@ import cookie from '@fastify/cookie';
 import jwt from '@fastify/jwt';
 import rateLimit from '@fastify/rate-limit';
 import { prisma } from '../lib/prisma.js';
+import { logger } from '../lib/logger.js';
 
 // ============================================================================
 // TYPE AUGMENTATION
@@ -44,7 +45,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET!;
     const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI!;
     const JWT_SECRET = process.env.JWT_SECRET!;
-    const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
+    const BOT_TOKEN = process.env.DISCORD_TOKEN;
     const DASHBOARD_URL = process.env.DASHBOARD_URL || 'http://localhost:5173';
     const NODE_ENV = process.env.NODE_ENV || 'development';
 
@@ -56,6 +57,10 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
             '   - DISCORD_REDIRECT_URI\n' +
             '   - JWT_SECRET'
         );
+    }
+
+    if (!BOT_TOKEN) {
+        logger.warn('⚠️  DISCORD_TOKEN is not set — welcome DMs on first sign-in will be skipped');
     }
 
     // ── Plugins ───────────────────────────────────────────────────────────────
@@ -119,7 +124,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
             });
 
             if (!userResponse.ok) {
-                app.log.error(
+                logger.error(
                     { status: userResponse.status },
                     'Failed to fetch Discord user profile during OAuth callback',
                 );
@@ -140,7 +145,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
                 isFirstSignIn = existing === null;
             } catch (lookupError) {
                 // Non-blocking — if lookup fails, skip the welcome DM rather than block sign-in.
-                app.log.warn({ err: lookupError, discordUserId: user.id }, 'Failed to check for existing user record');
+                logger.warn({ err: lookupError, discordUserId: user.id }, 'Failed to check for existing user record');
             }
 
             // ── Upsert user record ────────────────────────────────────────────
@@ -162,24 +167,28 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
                     },
                 });
 
-                app.log.info({ discordUserId: user.id }, 'User record upserted on sign-in');
+                logger.info({ discordUserId: user.id }, 'User record upserted on sign-in');
             } catch (dbError) {
                 // Log but do not block sign-in — a failed upsert should not deny access.
-                app.log.error({ err: dbError, discordUserId: user.id }, 'Failed to upsert user record on sign-in');
+                logger.error({ err: dbError, discordUserId: user.id }, 'Failed to upsert user record on sign-in');
             }
 
             // ── Send welcome DM on first sign-in ──────────────────────────────
-            if (isFirstSignIn && BOT_TOKEN) {
-                try {
-                    const isTester = await prisma.tester.findUnique({
-                        where: { discordUserId: user.id },
-                        select: { discordUserId: true },
-                    }) !== null;
+            if (isFirstSignIn) {
+                if (!BOT_TOKEN) {
+                    logger.warn({ discordUserId: user.id }, 'Skipping welcome DM — DISCORD_TOKEN is not set');
+                } else {
+                    try {
+                        const tester = await prisma.tester.findUnique({
+                            where: { discordUserId: user.id },
+                            select: { discordUserId: true },
+                        });
 
-                    await sendWelcomeDm(user.id, isTester, consentDate, BOT_TOKEN, app.log);
-                } catch (dmError) {
-                    // Non-blocking — DM failure must never block sign-in.
-                    app.log.warn({ err: dmError, discordUserId: user.id }, 'Failed to send welcome DM on first sign-in');
+                        await sendWelcomeDm(user.id, tester !== null, consentDate, BOT_TOKEN);
+                    } catch (dmError) {
+                        // Non-blocking — DM failure must never block sign-in.
+                        logger.warn({ err: dmError, discordUserId: user.id }, 'Failed to send welcome DM on first sign-in');
+                    }
                 }
             }
 
@@ -201,7 +210,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
 
             return reply.redirect(`${DASHBOARD_URL}/app`);
         } catch (error) {
-            app.log.error({ err: error }, 'OAuth2 callback failed');
+            logger.error({ err: error }, 'OAuth2 callback failed');
             return reply.redirect(`${DASHBOARD_URL}/login?error=oauth_failed`);
         }
     });
@@ -225,46 +234,52 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
  * Sends a welcome DM to a user on their first sign-in via the Discord REST API.
  *
  * Opens a DM channel with the user, then sends an embed containing:
- * - Their consent date and time
+ * - Their consent date and time rendered as a Discord timestamp
  * - Their current tester status and relevant next steps
  * - A reminder that they can delete their account and all data at any time
  *
- * Failures are non-blocking — the caller logs and continues.
+ * All failures are logged and non-blocking — this must never interrupt sign-in.
  *
  * @param discordUserId - The Discord user snowflake ID.
  * @param isTester      - Whether the user is a registered tester.
  * @param consentDate   - The timestamp at which consent was recorded.
  * @param botToken      - The Discord bot token for REST calls.
- * @param log           - The Fastify logger instance.
  */
 async function sendWelcomeDm(
     discordUserId: string,
     isTester: boolean,
     consentDate: Date,
     botToken: string,
-    log: FastifyInstance['log'],
 ): Promise<void> {
     const consentTimestamp = `<t:${Math.floor(consentDate.getTime() / 1000)}:F>`;
 
     // ── Open DM channel ───────────────────────────────────────────────────────
-    const channelResponse = await fetch('https://discord.com/api/v10/users/@me/channels', {
-        method: 'POST',
-        headers: {
-            Authorization: `Bot ${botToken}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ recipient_id: discordUserId }),
-    });
+    let channelId: string;
 
-    if (!channelResponse.ok) {
-        log.warn(
-            { discordUserId, status: channelResponse.status },
-            'Failed to open DM channel for welcome message',
-        );
+    try {
+        const channelResponse = await fetch('https://discord.com/api/v10/users/@me/channels', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bot ${botToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ recipient_id: discordUserId }),
+        });
+
+        if (!channelResponse.ok) {
+            logger.warn(
+                { discordUserId, status: channelResponse.status },
+                'Failed to open DM channel for welcome message',
+            );
+            return;
+        }
+
+        const channel = await channelResponse.json() as { id: string };
+        channelId = channel.id;
+    } catch (channelError) {
+        logger.warn({ err: channelError, discordUserId }, 'Error opening DM channel for welcome message');
         return;
     }
-
-    const channel = await channelResponse.json() as { id: string };
 
     // ── Build embed ───────────────────────────────────────────────────────────
     const embed = isTester
@@ -272,24 +287,29 @@ async function sendWelcomeDm(
         : buildNonTesterWelcomeEmbed(consentTimestamp);
 
     // ── Send message ──────────────────────────────────────────────────────────
-    const messageResponse = await fetch(`https://discord.com/api/v10/channels/${channel.id}/messages`, {
-        method: 'POST',
-        headers: {
-            Authorization: `Bot ${botToken}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ embeds: [embed] }),
-    });
+    try {
+        const messageResponse = await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bot ${botToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ embeds: [embed] }),
+        });
 
-    if (!messageResponse.ok) {
-        log.warn(
-            { discordUserId, status: messageResponse.status },
-            'Failed to send welcome DM',
-        );
+        if (!messageResponse.ok) {
+            logger.warn(
+                { discordUserId, status: messageResponse.status },
+                'Failed to send welcome DM',
+            );
+            return;
+        }
+    } catch (messageError) {
+        logger.warn({ err: messageError, discordUserId }, 'Error sending welcome DM message');
         return;
     }
 
-    log.info({ discordUserId, isTester }, 'Welcome DM sent on first sign-in');
+    logger.info({ discordUserId, isTester }, 'Welcome DM sent on first sign-in');
 }
 
 /**

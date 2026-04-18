@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { prisma } from '../lib/prisma.js';
+import { logger } from '../lib/logger.js';
 
 // ============================================================================
 // USERS ROUTES
@@ -14,10 +15,10 @@ import { prisma } from '../lib/prisma.js';
  *                                  and marks those servers as inactive.
  */
 export async function userRoutes(app: FastifyInstance): Promise<void> {
-    const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
+    const BOT_TOKEN = process.env.DISCORD_TOKEN;
 
     if (!BOT_TOKEN) {
-        app.log.warn('⚠️  DISCORD_BOT_TOKEN is not set — bot will not be able to leave servers on account deletion');
+        logger.warn('⚠️  DISCORD_TOKEN is not set — bot will not be able to leave servers on account deletion');
     }
 
     /**
@@ -73,18 +74,18 @@ export async function userRoutes(app: FastifyInstance): Promise<void> {
                             );
 
                             if (!leaveResponse.ok && leaveResponse.status !== 204) {
-                                app.log.warn(
+                                logger.warn(
                                     { discordServerId: server.discordServerId, status: leaveResponse.status },
                                     'Failed to leave Discord server — proceeding with deactivation anyway',
                                 );
                             } else {
-                                app.log.info(
+                                logger.info(
                                     { discordServerId: server.discordServerId },
                                     'Bot left Discord server due to admin account deletion',
                                 );
                             }
                         } catch (leaveError) {
-                            app.log.error(
+                            logger.error(
                                 { err: leaveError, discordServerId: server.discordServerId },
                                 'Error calling Discord API to leave server — proceeding with deactivation anyway',
                             );
@@ -100,12 +101,12 @@ export async function userRoutes(app: FastifyInstance): Promise<void> {
                             },
                         });
 
-                        app.log.info(
+                        logger.info(
                             { discordServerId: server.discordServerId },
                             'Server marked inactive due to admin account deletion',
                         );
                     } catch (updateError) {
-                        app.log.error(
+                        logger.error(
                             { err: updateError, discordServerId: server.discordServerId },
                             'Failed to mark server as inactive',
                         );
@@ -122,11 +123,11 @@ export async function userRoutes(app: FastifyInstance): Promise<void> {
                     where: { discordUserId },
                 });
 
-                app.log.info({ discordUserId }, 'User account and associated data deleted');
+                logger.info({ discordUserId }, 'User account and associated data deleted');
 
                 return reply.status(204).send();
             } catch (error) {
-                app.log.error({ err: error, discordUserId }, 'Failed to delete user account');
+                logger.error({ err: error, discordUserId }, 'Failed to delete user account');
                 return reply.status(500).send({ error: 'Internal server error' });
             }
         },
