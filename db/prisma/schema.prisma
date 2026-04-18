@@ -88,6 +88,10 @@ model Server {
   /// Whether this server is actively using the bot.
   status ServerStatus @default(active)
 
+  /// Human-readable reason for deactivation. Null if the server is active.
+  /// Set to 'admin_account_deleted' when the inviting admin deletes their account.
+  deactivationReason String? @map("deactivation_reason")
+
   /// Discord user ID of the tester who invited the bot to this server.
   /// Null if the inviter could not be determined.
   invitedBy String? @map("invited_by")
@@ -343,7 +347,7 @@ model UserReminderPreset {
   /// Timestamp of when this preset was created.
   createdAt DateTime @default(now()) @map("created_at")
 
-  user User @relation(fields: [discordUserId], references: [discordUserId])
+  user User @relation(fields: [discordUserId], references: [discordUserId], onDelete: Cascade)
 
   @@map("user_reminder_presets")
 }
