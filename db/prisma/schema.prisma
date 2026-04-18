@@ -88,6 +88,10 @@ model Server {
   /// Whether this server is actively using the bot.
   status ServerStatus @default(active)
 
+  /// Discord user ID of the tester who invited the bot to this server.
+  /// Null if the inviter could not be determined.
+  invitedBy String? @map("invited_by")
+
   /// Timestamp of when this server record was first created.
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -450,4 +454,22 @@ model ApprovedServer {
   addedAt DateTime @default(now()) @map("added_at")
 
   @@map("approved_servers")
+}
+
+// ───── PendingServer ─────
+/// A temporary record created when a tester initiates a bot invite from the dashboard.
+/// Used to associate the inviter with the server on guildCreate.
+/// Records older than 60 minutes are treated as stale and will be purged by the cleanup job.
+model PendingServer {
+  /// The Discord guild snowflake ID — serves as the primary key.
+  discordServerId String @id @map("discord_server_id")
+
+  /// Discord user ID of the tester who initiated the bot invite.
+  invitedBy String @map("invited_by")
+
+  /// Timestamp of when this pending record was created.
+  /// Used by the cleanup job to purge stale records older than 60 minutes.
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("pending_servers")
 }
