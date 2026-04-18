@@ -44,6 +44,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET!;
     const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI!;
     const JWT_SECRET = process.env.JWT_SECRET!;
+    const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
     const DASHBOARD_URL = process.env.DASHBOARD_URL || 'http://localhost:5173';
     const NODE_ENV = process.env.NODE_ENV || 'development';
 
@@ -97,9 +98,12 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
      * Flow:
      *   1. Exchanges the authorisation code for a Discord access token.
      *   2. Fetches the authenticated Discord user's profile.
-     *   3. Upserts a User record in the database, updating lastActiveAt on each sign-in.
-     *   4. Signs a JWT containing the user's Discord identity.
-     *   5. Sets the JWT as an httpOnly session cookie and redirects to the dashboard.
+     *   3. Checks if this is the user's first sign-in.
+     *   4. Upserts a User record in the database, updating lastActiveAt on each sign-in.
+     *   5. On first sign-in, sends a welcome DM via the bot with consent details
+     *      and relevant next steps based on tester status.
+     *   6. Signs a JWT containing the user's Discord identity.
+     *   7. Sets the JWT as an httpOnly session cookie and redirects to the dashboard.
      *
      * On any failure, redirects to the login page with an appropriate error code.
      */
@@ -124,17 +128,34 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
 
             const user = await userResponse.json() as DiscordUser;
 
+            // ── Detect first sign-in ──────────────────────────────────────────
+            // Check before upsert so we can send a welcome DM only on account creation.
+            let isFirstSignIn = false;
+
+            try {
+                const existing = await prisma.user.findUnique({
+                    where: { discordUserId: user.id },
+                    select: { discordUserId: true },
+                });
+                isFirstSignIn = existing === null;
+            } catch (lookupError) {
+                // Non-blocking — if lookup fails, skip the welcome DM rather than block sign-in.
+                app.log.warn({ err: lookupError, discordUserId: user.id }, 'Failed to check for existing user record');
+            }
+
             // ── Upsert user record ────────────────────────────────────────────
             // Creates the record on first sign-in; updates lastActiveAt on subsequent ones.
             // dmConsent and other preferences are left unchanged on update.
+            const consentDate = new Date();
+
             try {
                 await prisma.user.upsert({
                     where: { discordUserId: user.id },
                     create: {
                         discordUserId: user.id,
                         dmConsent: true,
-                        dmConsentGivenAt: new Date(),
-                        lastActiveAt: new Date(),
+                        dmConsentGivenAt: consentDate,
+                        lastActiveAt: consentDate,
                     },
                     update: {
                         lastActiveAt: new Date(),
@@ -145,6 +166,21 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
             } catch (dbError) {
                 // Log but do not block sign-in — a failed upsert should not deny access.
                 app.log.error({ err: dbError, discordUserId: user.id }, 'Failed to upsert user record on sign-in');
+            }
+
+            // ── Send welcome DM on first sign-in ──────────────────────────────
+            if (isFirstSignIn && BOT_TOKEN) {
+                try {
+                    const isTester = await prisma.tester.findUnique({
+                        where: { discordUserId: user.id },
+                        select: { discordUserId: true },
+                    }) !== null;
+
+                    await sendWelcomeDm(user.id, isTester, consentDate, BOT_TOKEN, app.log);
+                } catch (dmError) {
+                    // Non-blocking — DM failure must never block sign-in.
+                    app.log.warn({ err: dmError, discordUserId: user.id }, 'Failed to send welcome DM on first sign-in');
+                }
             }
 
             // ── Sign session JWT ──────────────────────────────────────────────
@@ -179,4 +215,126 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
         reply.clearCookie('session', { path: '/' });
         return reply.redirect(`${DASHBOARD_URL}/`);
     });
+}
+
+// ============================================================================
+// WELCOME DM
+// ============================================================================
+
+/**
+ * Sends a welcome DM to a user on their first sign-in via the Discord REST API.
+ *
+ * Opens a DM channel with the user, then sends an embed containing:
+ * - Their consent date and time
+ * - Their current tester status and relevant next steps
+ * - A reminder that they can delete their account and all data at any time
+ *
+ * Failures are non-blocking — the caller logs and continues.
+ *
+ * @param discordUserId - The Discord user snowflake ID.
+ * @param isTester      - Whether the user is a registered tester.
+ * @param consentDate   - The timestamp at which consent was recorded.
+ * @param botToken      - The Discord bot token for REST calls.
+ * @param log           - The Fastify logger instance.
+ */
+async function sendWelcomeDm(
+    discordUserId: string,
+    isTester: boolean,
+    consentDate: Date,
+    botToken: string,
+    log: FastifyInstance['log'],
+): Promise<void> {
+    const consentTimestamp = `<t:${Math.floor(consentDate.getTime() / 1000)}:F>`;
+
+    // ── Open DM channel ───────────────────────────────────────────────────────
+    const channelResponse = await fetch('https://discord.com/api/v10/users/@me/channels', {
+        method: 'POST',
+        headers: {
+            Authorization: `Bot ${botToken}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ recipient_id: discordUserId }),
+    });
+
+    if (!channelResponse.ok) {
+        log.warn(
+            { discordUserId, status: channelResponse.status },
+            'Failed to open DM channel for welcome message',
+        );
+        return;
+    }
+
+    const channel = await channelResponse.json() as { id: string };
+
+    // ── Build embed ───────────────────────────────────────────────────────────
+    const embed = isTester
+        ? buildTesterWelcomeEmbed(consentTimestamp)
+        : buildNonTesterWelcomeEmbed(consentTimestamp);
+
+    // ── Send message ──────────────────────────────────────────────────────────
+    const messageResponse = await fetch(`https://discord.com/api/v10/channels/${channel.id}/messages`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bot ${botToken}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ embeds: [embed] }),
+    });
+
+    if (!messageResponse.ok) {
+        log.warn(
+            { discordUserId, status: messageResponse.status },
+            'Failed to send welcome DM',
+        );
+        return;
+    }
+
+    log.info({ discordUserId, isTester }, 'Welcome DM sent on first sign-in');
+}
+
+/**
+ * Builds the welcome embed for a registered tester.
+ */
+function buildTesterWelcomeEmbed(consentTimestamp: string): object {
+    return {
+        color: 0x57F287,
+        description:
+            `<:LurkingOwl:1494826568881799349> Hey there!\n` +
+            `\n` +
+            `<:HappyOwl:1494826567271055451> Welcome to Firesong Herald — you're signed up as a tester. Thanks for being part of this.\n` +
+            `\n` +
+            `**Your dashboard access is active.** Head to https://firesongherald.com to get started.\n` +
+            `\n` +
+            `**A note on your data**\n` +
+            `On ${consentTimestamp}, you agreed to our Privacy Policy and Terms of Service by signing in. ` +
+            `You can delete your account and all associated data at any time from the dashboard footer or account menu.\n` +
+            `\n` +
+            `Join the support server if you have questions or feedback:\n` +
+            `https://discord.gg/e8eVQTB24z\n` +
+            `\n` +
+            `— Your faithful Owl <:FeatherSparkle:1494840173849088061>`,
+    };
+}
+
+/**
+ * Builds the welcome embed for a non-tester user.
+ */
+function buildNonTesterWelcomeEmbed(consentTimestamp: string): object {
+    return {
+        color: 0x4A90D9,
+        description:
+            `<:LurkingOwl:1494826568881799349> Hey there!\n` +
+            `\n` +
+            `Thanks for signing in to Firesong Herald. We're currently in closed testing, ` +
+            `so dashboard access is limited to approved testers for now.\n` +
+            `\n` +
+            `**Want to get involved?** Open a thread in our support server and we'll take it from there:\n` +
+            `https://discord.gg/e8eVQTB24z\n` +
+            `\n` +
+            `**A note on your data**\n` +
+            `On ${consentTimestamp}, you agreed to our Privacy Policy and Terms of Service by signing in. ` +
+            `You can delete your account and all associated data at any time from the dashboard footer or account menu.\n` +
+            `\n` +
+            `— Your faithful Owl <:FeatherHeart:1494840167880724590>`,
+    };
 }
