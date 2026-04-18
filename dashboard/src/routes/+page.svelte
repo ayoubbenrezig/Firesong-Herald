@@ -6,6 +6,7 @@
     import RefreshButton from '$lib/components/RefreshButton.svelte';
     import TesterModal from '$lib/components/TesterModal.svelte';
     import ThankYouModal from '$lib/components/ThankYouModal.svelte';
+    import DeleteAccountModal from '$lib/components/DeleteAccountModal.svelte';
 
     // ── Props ─────────────────────────────────────────────────────────────────
 
@@ -91,6 +92,7 @@
 
     let testerModalOpen = $state(false);
     let thankYouModalOpen = $state(false);
+    let deleteAccountModalOpen = $state(false);
 
     function openTesterModal(): void {
         testerModalOpen = true;
@@ -106,6 +108,15 @@
 
     function closeThankYouModal(): void {
         thankYouModalOpen = false;
+    }
+
+    function openDeleteAccountModal(): void {
+        dropdownOpen = false;
+        deleteAccountModalOpen = true;
+    }
+
+    function closeDeleteAccountModal(): void {
+        deleteAccountModalOpen = false;
     }
 </script>
 
@@ -177,6 +188,14 @@
                                     <SignOutIcon class="size-4" />
                                     Sign out
                                 </a>
+                                <button
+                                        type="button"
+                                        onclick={openDeleteAccountModal}
+                                        class="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-error-500 hover:bg-surface-200 dark:hover:bg-surface-800 transition-colors"
+                                >
+                                    <SignOutIcon class="size-4" />
+                                    Delete account
+                                </button>
                             </div>
                         {/if}
                     </div>
@@ -288,6 +307,15 @@
             <a href="/privacy" class="hover:underline">Privacy Policy</a>
             <a href="/tos" class="hover:underline">Terms of Service</a>
             <a href="https://github.com/ayoubbenrezig/Firesong-Herald" target="_blank" rel="noopener noreferrer" class="hover:underline">GitHub</a>
+            {#if user}
+                <button
+                        type="button"
+                        onclick={openDeleteAccountModal}
+                        class="text-error-500 hover:underline"
+                >
+                    Delete account
+                </button>
+            {/if}
         </div>
         <p class="mt-3">© {new Date().getFullYear()} Firesong Herald. Open source under AGPL-3.0.</p>
     </footer>
@@ -298,9 +326,17 @@
             {botInviteUrl}
             onBecomeTester={openTesterModal}
             onThankYou={openThankYouModal}
+            onDeleteAccount={openDeleteAccountModal}
     />
 
 </div>
 
 <TesterModal open={testerModalOpen} onclose={closeTesterModal} />
 <ThankYouModal open={thankYouModalOpen} onclose={closeThankYouModal} />
+{#if user}
+    <DeleteAccountModal
+            open={deleteAccountModalOpen}
+            discordUserId={user.discordId}
+            onclose={closeDeleteAccountModal}
+    />
+{/if}

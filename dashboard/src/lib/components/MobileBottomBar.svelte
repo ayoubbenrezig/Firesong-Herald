@@ -10,6 +10,7 @@
         DownloadSimpleIcon,
         SignOutIcon,
         TestTubeIcon,
+        TrashIcon,
     } from 'phosphor-svelte';
 
     // ── Props ─────────────────────────────────────────────────────────────────
@@ -25,9 +26,10 @@
         botInviteUrl: string | null;
         onBecomeTester: () => void;
         onThankYou: () => void;
+        onDeleteAccount: () => void;
     }
 
-    let { user, isTester, botInviteUrl, onBecomeTester, onThankYou }: Props = $props();
+    let { user, isTester, botInviteUrl, onBecomeTester, onThankYou, onDeleteAccount }: Props = $props();
 
     // ── State ─────────────────────────────────────────────────────────────────
 
@@ -120,15 +122,20 @@
         }
     }
 
+    function handleDeleteAccount(): void {
+        closeAll();
+        onDeleteAccount();
+    }
+
     // ── Nav info items ────────────────────────────────────────────────────────
 
-    const navItems = [
+    const navItems = $derived([
         { icon: HouseIcon, label: 'Home', description: 'Return to the landing page.' },
         ...(user && isTester ? [{ icon: SquaresFourIcon, label: 'Dashboard', description: 'Open the web dashboard.' }] : []),
         { icon: UserCircleIcon, label: user ? (user.globalName ?? user.username) : 'Sign in', description: user ? 'Opens account options.' : 'Sign in to your account.' },
         { icon: ListIcon, label: 'More', description: 'Opens GitHub, Privacy, and Terms links.' },
         ...(!isInstalled ? [{ icon: DownloadSimpleIcon, label: 'Add to Home Screen', description: 'Found in the menu (≡).\nAdds Firesong Herald to your home screen for quick access.' }] : []),
-    ];
+    ]);
 </script>
 
 <div class="mobile-bottom-bar min-[920px]:hidden">
@@ -195,6 +202,10 @@
                 <SignOutIcon class="size-5" />
                 <span>Sign out</span>
             </a>
+            <button onclick={handleDeleteAccount} class="mobile-menu-link text-error-500">
+                <TrashIcon class="size-5" />
+                <span>Delete account</span>
+            </button>
         </div>
     {/if}
 
