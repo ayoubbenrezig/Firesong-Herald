@@ -15,12 +15,6 @@ import { logger } from '../lib/logger.js';
  *                                  and marks those servers as inactive.
  */
 export async function userRoutes(app: FastifyInstance): Promise<void> {
-    const BOT_TOKEN = process.env.DISCORD_TOKEN;
-
-    if (!BOT_TOKEN) {
-        logger.warn('⚠️  DISCORD_TOKEN is not set — bot will not be able to leave servers on account deletion');
-    }
-
     /**
      * Deletes a user account and all associated data.
      *
@@ -41,6 +35,13 @@ export async function userRoutes(app: FastifyInstance): Promise<void> {
         '/users/:discordUserId',
         async function (request, reply) {
             const { discordUserId } = request.params;
+
+            // Read at request time so tests can control the value per-test
+            const BOT_TOKEN = process.env.DISCORD_TOKEN;
+
+            if (!BOT_TOKEN) {
+                logger.warn('⚠️  DISCORD_TOKEN is not set — bot will not be able to leave servers on account deletion');
+            }
 
             try {
                 // ── Verify user exists ────────────────────────────────────────
