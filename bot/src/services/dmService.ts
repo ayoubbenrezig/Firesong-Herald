@@ -1,5 +1,5 @@
-import { EmbedBuilder, type User } from 'discord.js';
-import { Colours } from '../utils/colours.js';
+import { type User } from 'discord.js';
+import { buildEmbed } from '../utils/embed.js';
 import { Emoji } from '../utils/emojis.js';
 import { logger } from '../utils/logger.js';
 
@@ -50,10 +50,10 @@ export type DmPayload = {
  * Builds the embed for a rejected (unapproved) guild DM.
  * Sent to the server owner when the bot leaves an unapproved server.
  */
-function buildGuildRejectedEmbed(payload: DmPayloadMap[DmType.GuildRejected]): EmbedBuilder {
-    return new EmbedBuilder()
-        .setColor(Colours.error)
-        .setDescription(
+function buildGuildRejectedEmbed(payload: DmPayloadMap[DmType.GuildRejected]) {
+    return buildEmbed({
+        colour: 'error',
+        description:
             `${Emoji.LurkingOwl} Hey there!\n` +
             `\n` +
             `${Emoji.SadOwl} Thanks for adding Firesong Herald to **${payload.serverName}**. ` +
@@ -65,18 +65,18 @@ function buildGuildRejectedEmbed(payload: DmPayloadMap[DmType.GuildRejected]): E
             `https://discord.gg/e8eVQTB24z\n` +
             `\n` +
             `Take care!\n` +
-            `— Your faithful Owl ${Emoji.FeatherHeart}`
-        );
+            `— Your faithful Owl ${Emoji.FeatherHeart}`,
+    });
 }
 
 /**
  * Builds the embed for an approved guild DM.
  * Sent to the server owner when their server is successfully registered.
  */
-function buildGuildApprovedEmbed(payload: DmPayloadMap[DmType.GuildApproved]): EmbedBuilder {
-    return new EmbedBuilder()
-        .setColor(Colours.success)
-        .setDescription(
+function buildGuildApprovedEmbed(payload: DmPayloadMap[DmType.GuildApproved]) {
+    return buildEmbed({
+        colour: 'success',
+        description:
             `${Emoji.LurkingOwl} Hey there!\n` +
             `\n` +
             `${Emoji.HappyOwl} You're in! **${payload.serverName}** has been registered and the bot is ready to go.\n` +
@@ -90,8 +90,8 @@ function buildGuildApprovedEmbed(payload: DmPayloadMap[DmType.GuildApproved]): E
             `https://discord.gg/e8eVQTB24z\n` +
             `\n` +
             `Welcome aboard!\n` +
-            `— Your faithful Owl ${Emoji.FeatherSparkle}`
-        );
+            `— Your faithful Owl ${Emoji.FeatherSparkle}`,
+    });
 }
 
 // ============================================================================
@@ -104,7 +104,7 @@ function buildGuildApprovedEmbed(payload: DmPayloadMap[DmType.GuildApproved]): E
  * @param payload - The typed DM payload containing type and required data.
  * @returns An EmbedBuilder instance for the given DM type.
  */
-function buildDmMessage(payload: DmPayload): EmbedBuilder {
+function buildDmMessage(payload: DmPayload) {
     switch (payload.type) {
         case DmType.GuildRejected:
             return buildGuildRejectedEmbed(payload);
@@ -146,7 +146,6 @@ export async function sendDm(user: User, payload: DmPayload): Promise<boolean> {
 
         return true;
     } catch (error) {
-        // Discord throws when a user has DMs disabled — log but do not throw.
         logger.warn(
             { err: error, discordUserId: user.id, dmType: payload.type },
             'Failed to send DM — user may have DMs disabled',
