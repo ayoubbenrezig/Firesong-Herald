@@ -13,6 +13,9 @@ import { testerRoutes } from './routes/testers.js';
 import { configRoutes } from './routes/config.js';
 import { serverRoutes } from './routes/servers.js';
 import { userRoutes } from './routes/users.js';
+import { websocketPlugin } from './plugins/websocket.js';
+import { wsTokenRoutes } from './routes/wsToken.js';
+import { wsRoutes } from './routes/ws.js';
 
 // Load .env from project root
 const __filename = fileURLToPath(import.meta.url);
@@ -78,12 +81,17 @@ async function buildServer(): Promise<ReturnType<typeof Fastify>> {
         timeWindow: '1 minute',
     });
 
+    // WebSocket plugin must be registered before wsRoutes
+    await app.register(websocketPlugin);
+
     await app.register(healthRoutes);
     await app.register(authRoutes);
     await app.register(testerRoutes);
     await app.register(configRoutes);
     await app.register(serverRoutes);
     await app.register(userRoutes);
+    await app.register(wsTokenRoutes);
+    await app.register(wsRoutes);
 
     return app;
 }
