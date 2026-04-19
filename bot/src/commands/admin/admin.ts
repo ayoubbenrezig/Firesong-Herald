@@ -2,6 +2,7 @@ import {
     SlashCommandBuilder,
     ChatInputCommandInteraction,
     PermissionFlagsBits,
+    InteractionContextType,
 } from 'discord.js';
 import { checkIsAdmin, addTester, removeTester, approveServer, revokeServer } from '../../services/adminService.js';
 import { buildEmbed, errorEmbed } from '../../utils/embed.js';
@@ -15,6 +16,7 @@ export const data = new SlashCommandBuilder()
     .setName('admin')
     .setDescription('Admin-only management commands.')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+    .setContexts(InteractionContextType.Guild)
     .addSubcommand(sub =>
         sub
             .setName('add-tester')

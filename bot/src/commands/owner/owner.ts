@@ -2,6 +2,7 @@ import {
     SlashCommandBuilder,
     ChatInputCommandInteraction,
     PermissionFlagsBits,
+    InteractionContextType,
 } from 'discord.js';
 import { addAdminRole, removeAdminRole } from '../../services/ownerService.js';
 import { buildEmbed, errorEmbed } from '../../utils/embed.js';
@@ -15,6 +16,7 @@ export const data = new SlashCommandBuilder()
     .setName('owner')
     .setDescription('Owner-only server configuration commands.')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+    .setContexts(InteractionContextType.Guild)
     .addSubcommand(sub =>
         sub
             .setName('add-admin-role')
