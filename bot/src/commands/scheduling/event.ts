@@ -6,12 +6,18 @@ import {
     TextInputStyle,
     LabelBuilder,
     MessageFlags,
+    InteractionContextType,
 } from 'discord.js';
 import { logger } from '../../utils/logger.js';
+
+// ============================================================================
+// EVENT COMMAND
+// ============================================================================
 
 export const data = new SlashCommandBuilder()
     .setName('event')
     .setDescription('Manage events')
+    .setContexts(InteractionContextType.Guild)
     .addSubcommand((subcommand) =>
         subcommand
             .setName('create')
