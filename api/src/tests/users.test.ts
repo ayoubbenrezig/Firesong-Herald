@@ -79,11 +79,11 @@ function discordLeaveFail(status: number): Response {
 
 beforeEach(() => {
     vi.clearAllMocks();
-    process.env.DISCORD_BOT_TOKEN = 'test-bot-token';
+    process.env.DISCORD_TOKEN = 'test-bot-token';
 });
 
 afterEach(() => {
-    delete process.env.DISCORD_BOT_TOKEN;
+    delete process.env.DISCORD_TOKEN;
 });
 
 // ============================================================================
@@ -251,7 +251,7 @@ describe('DELETE /users/:discordUserId', () => {
     // ── BOT_TOKEN not set ─────────────────────────────────────────────────────
 
     it('skips Discord call but still marks server inactive and deletes user when BOT_TOKEN is not set', async () => {
-        delete process.env.DISCORD_BOT_TOKEN;
+        delete process.env.DISCORD_TOKEN;
 
         mockUserFindUnique.mockResolvedValueOnce({ discordUserId: '888' });
         mockServerFindMany.mockResolvedValueOnce([{ discordServerId: 'srv-6' }]);
