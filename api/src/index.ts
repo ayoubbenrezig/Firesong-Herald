@@ -12,6 +12,7 @@ import { authRoutes } from './routes/auth.js';
 import { testerRoutes } from './routes/testers.js';
 import { configRoutes } from './routes/config.js';
 import { serverRoutes } from './routes/servers.js';
+import { userRoutes } from './routes/users.js';
 
 // Load .env from project root
 const __filename = fileURLToPath(import.meta.url);
@@ -35,10 +36,6 @@ if (envPath) {
 } else {
     console.warn('⚠️  .env file not found, relying on system environment variables');
 }
-
-// ============================================================================
-// SERVER BOOTSTRAP
-// ============================================================================
 
 const PORT = Number(process.env.API_PORT) || 3001;
 const HOST = process.env.API_HOST || '0.0.0.0';
@@ -67,29 +64,26 @@ async function buildServer(): Promise<ReturnType<typeof Fastify>> {
         },
     });
 
-    // ── Security headers ──────────────────────────────────────────────────────
     await app.register(helmet);
 
-    // ── CORS ─────────────────────────────────────────────────────────────────
     await app.register(cors, {
         origin: NODE_ENV === 'production' ? DASHBOARD_URL : true,
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     });
 
-    // ── Rate limiting ─────────────────────────────────────────────────────────
     await app.register(rateLimit, {
         global: true,
         max: 100,
         timeWindow: '1 minute',
     });
 
-    // ── Routes ────────────────────────────────────────────────────────────────
     await app.register(healthRoutes);
     await app.register(authRoutes);
     await app.register(testerRoutes);
     await app.register(configRoutes);
     await app.register(serverRoutes);
+    await app.register(userRoutes);
 
     return app;
 }

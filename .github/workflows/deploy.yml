@@ -11,6 +11,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check if commands changed
+        id: commands_changed
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -q '^bot/src/commands/'; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Deploy to server
         uses: appleboy/ssh-action@v1.2.1
         with:
@@ -21,36 +35,46 @@ jobs:
             cd /home/deploy/firesong-herald
             git pull || exit 1
             docker compose up -d --build || exit 1
-            docker compose run --rm bot node bot/dist/bot/src/scripts/deploy.js || exit 1
+            if [ "${{ steps.commands_changed.outputs.changed }}" = "true" ]; then
+              docker compose run --rm bot node bot/dist/bot/src/scripts/deploy.js || exit 1
+            fi
 
       - name: Notify Discord on success
         if: success()
         run: |
+          COMMANDS_FIELD=""
+          if [ "${{ steps.commands_changed.outputs.changed }}" = "true" ]; then
+            COMMANDS_FIELD=', {"name": "Slash Commands", "value": "✅ Registered", "inline": true}'
+          else
+            COMMANDS_FIELD=', {"name": "Slash Commands", "value": "⏭️ Skipped (no changes)", "inline": true}'
+          fi
+
           curl -H "Content-Type: application/json" \
-            -d '{
-              "embeds": [{
-                "title": "🚀 Deployment Successful",
-                "description": "**Firesong Herald** has been deployed to production.",
-                "color": 5763719,
-                "fields": [
+            -d "{
+              \"embeds\": [{
+                \"title\": \"🚀 Deployment Successful\",
+                \"description\": \"**Firesong Herald** has been deployed to production.\",
+                \"color\": 5763719,
+                \"fields\": [
                   {
-                    "name": "Branch",
-                    "value": "${{ github.ref_name }}",
-                    "inline": true
+                    \"name\": \"Branch\",
+                    \"value\": \"${{ github.ref_name }}\",
+                    \"inline\": true
                   },
                   {
-                    "name": "Triggered by",
-                    "value": "${{ secrets.DEPLOY_NAME }}",
-                    "inline": true
+                    \"name\": \"Triggered by\",
+                    \"value\": \"${{ secrets.DEPLOY_NAME }}\",
+                    \"inline\": true
                   },
                   {
-                    "name": "Commit",
-                    "value": "[`${{ github.sha }}`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})",
-                    "inline": false
+                    \"name\": \"Commit\",
+                    \"value\": \"[\`${{ github.sha }}\`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})\",
+                    \"inline\": false
                   }
+                  $COMMANDS_FIELD
                 ]
               }]
-            }' \
+            }" \
             ${{ secrets.DISCORD_WEBHOOK_DEPLOYMENTS }}
 
       - name: Notify Discord on failure
