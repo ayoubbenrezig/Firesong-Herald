@@ -5,6 +5,7 @@ import {
     TextInputBuilder,
     TextInputStyle,
     LabelBuilder,
+    MessageFlags,
 } from 'discord.js';
 import { logger } from '../../utils/logger.js';
 
@@ -102,6 +103,6 @@ async function handleCreate(interaction: ChatInputCommandInteraction): Promise<v
         await interaction.showModal(modal);
     } catch (error) {
         logger.error({ err: error }, '❌ [event] Failed to show event creation modal');
-        await interaction.reply({ content: 'Something went wrong. Please try again.', ephemeral: true });
+        await interaction.reply({ content: 'Something went wrong. Please try again.', flags: MessageFlags.Ephemeral });
     }
 }

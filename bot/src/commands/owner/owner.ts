@@ -1,11 +1,10 @@
 import {
     SlashCommandBuilder,
     ChatInputCommandInteraction,
-    EmbedBuilder,
     PermissionFlagsBits,
 } from 'discord.js';
 import { addAdminRole, removeAdminRole } from '../../services/ownerService.js';
-import { Colours } from '../../utils/colours.js';
+import { buildEmbed, errorEmbed } from '../../utils/embed.js';
 import { logger } from '../../utils/logger.js';
 
 // ============================================================================
@@ -66,12 +65,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
 
     if (interaction.user.id !== guild.ownerId) {
         await interaction.reply({
-            embeds: [
-                new EmbedBuilder()
-                    .setColor(Colours.error)
-                    .setTitle('Access denied')
-                    .setDescription('Only the server owner can use this command.'),
-            ],
+            embeds: [errorEmbed('Only the server owner can use this command.', 'Access denied')],
             ephemeral: true,
         });
         return;
@@ -80,81 +74,59 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     const subcommand = interaction.options.getSubcommand();
     const role = interaction.options.getRole('role', true);
 
+    // ── Add admin role ────────────────────────────────────────────────────────
     if (subcommand === 'add-admin-role') {
         try {
             await addAdminRole(guild.id, role.id, interaction.user.id);
 
             await interaction.reply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setColor(Colours.owner)
-                        .setTitle('Admin role added')
-                        .setDescription(`<@&${role.id}> has been granted admin access to Firesong Herald for this server.`)
-                        .setFooter({ text: `Actioned by ${interaction.user.username}` })
-                        .setTimestamp(),
-                ],
+                embeds: [buildEmbed({
+                    colour: 'owner',
+                    title: 'Admin role added',
+                    description: `<@&${role.id}> has been granted admin access to Firesong Herald for this server.`,
+                    footer: `Actioned by ${interaction.user.username}`,
+                })],
             });
         } catch (error) {
             if (error instanceof Error && error.message === 'ALREADY_EXISTS') {
                 await interaction.reply({
-                    embeds: [
-                        new EmbedBuilder()
-                            .setColor(Colours.error)
-                            .setTitle('Already registered')
-                            .setDescription(`<@&${role.id}> already has admin access to Firesong Herald in this server.`),
-                    ],
+                    embeds: [errorEmbed(`<@&${role.id}> already has admin access to Firesong Herald in this server.`, 'Already registered')],
                 });
                 return;
             }
 
             logger.error({ err: error }, '❌ [owner] add-admin-role failed');
             await interaction.reply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setColor(Colours.error)
-                        .setTitle('Something went wrong')
-                        .setDescription('Failed to add admin role. Please try again later.'),
-                ],
+                embeds: [errorEmbed('Failed to add admin role. Please try again later.', 'Something went wrong')],
                 ephemeral: true,
             });
         }
     }
 
+    // ── Remove admin role ─────────────────────────────────────────────────────
     if (subcommand === 'remove-admin-role') {
         try {
             await removeAdminRole(guild.id, role.id, interaction.user.id);
 
             await interaction.reply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setColor(Colours.owner)
-                        .setTitle('Admin role removed')
-                        .setDescription(`<@&${role.id}> no longer has admin access to Firesong Herald for this server.`)
-                        .setFooter({ text: `Actioned by ${interaction.user.username}` })
-                        .setTimestamp(),
-                ],
+                embeds: [buildEmbed({
+                    colour: 'owner',
+                    title: 'Admin role removed',
+                    description: `<@&${role.id}> no longer has admin access to Firesong Herald for this server.`,
+                    footer: `Actioned by ${interaction.user.username}`,
+                })],
             });
         } catch (error) {
             if (error instanceof Error && error.message === 'NOT_FOUND') {
                 await interaction.reply({
-                    embeds: [
-                        new EmbedBuilder()
-                            .setColor(Colours.error)
-                            .setTitle('Not found')
-                            .setDescription(`<@&${role.id}> does not have admin access to Firesong Herald in this server.`),
-                    ],
+                    embeds: [errorEmbed(`<@&${role.id}> does not have admin access to Firesong Herald in this server.`, 'Not found')],
                 });
                 return;
             }
 
             logger.error({ err: error }, '❌ [owner] remove-admin-role failed');
             await interaction.reply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setColor(Colours.error)
-                        .setTitle('Something went wrong')
-                        .setDescription('Failed to remove admin role. Please try again later.'),
-                ],
+                embeds: [errorEmbed('Failed to remove admin role. Please try again later.', 'Something went wrong')],
                 ephemeral: true,
             });
         }

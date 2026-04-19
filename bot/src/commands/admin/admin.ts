@@ -1,11 +1,10 @@
 import {
     SlashCommandBuilder,
     ChatInputCommandInteraction,
-    EmbedBuilder,
     PermissionFlagsBits,
 } from 'discord.js';
 import { checkIsAdmin, addTester, removeTester, approveServer, revokeServer } from '../../services/adminService.js';
-import { Colours } from '../../utils/colours.js';
+import { buildEmbed, errorEmbed } from '../../utils/embed.js';
 import { logger } from '../../utils/logger.js';
 
 // ============================================================================
@@ -110,12 +109,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
 
         if (!hasAccess) {
             await interaction.reply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setColor(Colours.error)
-                        .setTitle('Access denied')
-                        .setDescription('You do not have admin access to Firesong Herald for this server.'),
-                ],
+                embeds: [errorEmbed('You do not have admin access to Firesong Herald for this server.', 'Access denied')],
                 ephemeral: true,
             });
             return;
@@ -123,12 +117,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     } catch (error) {
         logger.error({ err: error }, '❌ [admin] Permission check failed');
         await interaction.reply({
-            embeds: [
-                new EmbedBuilder()
-                    .setColor(Colours.error)
-                    .setTitle('Something went wrong')
-                    .setDescription('Failed to verify permissions. Please try again later.'),
-            ],
+            embeds: [errorEmbed('Failed to verify permissions. Please try again later.', 'Something went wrong')],
             ephemeral: true,
         });
         return;
@@ -144,36 +133,24 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
             await addTester(user.id, interaction.user.id);
 
             await interaction.reply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setColor(Colours.admin)
-                        .setTitle('Tester approved')
-                        .setDescription(`<@${user.id}> has been approved as a Firesong Herald dashboard tester.`)
-                        .setFooter({ text: `Actioned by ${interaction.user.username}` })
-                        .setTimestamp(),
-                ],
+                embeds: [buildEmbed({
+                    colour: 'admin',
+                    title: 'Tester approved',
+                    description: `<@${user.id}> has been approved as a Firesong Herald dashboard tester.`,
+                    footer: `Actioned by ${interaction.user.username}`,
+                })],
             });
         } catch (error) {
             if (error instanceof Error && error.message === 'ALREADY_EXISTS') {
                 await interaction.reply({
-                    embeds: [
-                        new EmbedBuilder()
-                            .setColor(Colours.error)
-                            .setTitle('Already a tester')
-                            .setDescription(`<@${user.id}> is already approved as a Firesong Herald dashboard tester.`),
-                    ],
+                    embeds: [errorEmbed(`<@${user.id}> is already approved as a Firesong Herald dashboard tester.`, 'Already a tester')],
                 });
                 return;
             }
 
             logger.error({ err: error }, '❌ [admin] add-tester failed');
             await interaction.reply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setColor(Colours.error)
-                        .setTitle('Something went wrong')
-                        .setDescription('Failed to add tester. Please try again later.'),
-                ],
+                embeds: [errorEmbed('Failed to add tester. Please try again later.', 'Something went wrong')],
                 ephemeral: true,
             });
         }
@@ -187,36 +164,24 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
             await removeTester(user.id, interaction.user.id);
 
             await interaction.reply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setColor(Colours.admin)
-                        .setTitle('Tester removed')
-                        .setDescription(`<@${user.id}> no longer has access to the Firesong Herald dashboard.`)
-                        .setFooter({ text: `Actioned by ${interaction.user.username}` })
-                        .setTimestamp(),
-                ],
+                embeds: [buildEmbed({
+                    colour: 'admin',
+                    title: 'Tester removed',
+                    description: `<@${user.id}> no longer has access to the Firesong Herald dashboard.`,
+                    footer: `Actioned by ${interaction.user.username}`,
+                })],
             });
         } catch (error) {
             if (error instanceof Error && error.message === 'NOT_FOUND') {
                 await interaction.reply({
-                    embeds: [
-                        new EmbedBuilder()
-                            .setColor(Colours.error)
-                            .setTitle('Not found')
-                            .setDescription(`<@${user.id}> is not currently approved as a Firesong Herald dashboard tester.`),
-                    ],
+                    embeds: [errorEmbed(`<@${user.id}> is not currently approved as a Firesong Herald dashboard tester.`, 'Not found')],
                 });
                 return;
             }
 
             logger.error({ err: error }, '❌ [admin] remove-tester failed');
             await interaction.reply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setColor(Colours.error)
-                        .setTitle('Something went wrong')
-                        .setDescription('Failed to remove tester. Please try again later.'),
-                ],
+                embeds: [errorEmbed('Failed to remove tester. Please try again later.', 'Something went wrong')],
                 ephemeral: true,
             });
         }
@@ -230,36 +195,24 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
             await approveServer(serverId, interaction.user.id);
 
             await interaction.reply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setColor(Colours.admin)
-                        .setTitle('Server approved')
-                        .setDescription(`Server \`${serverId}\` has been approved for Firesong Herald bot testing.`)
-                        .setFooter({ text: `Actioned by ${interaction.user.username}` })
-                        .setTimestamp(),
-                ],
+                embeds: [buildEmbed({
+                    colour: 'admin',
+                    title: 'Server approved',
+                    description: `Server \`${serverId}\` has been approved for Firesong Herald bot testing.`,
+                    footer: `Actioned by ${interaction.user.username}`,
+                })],
             });
         } catch (error) {
             if (error instanceof Error && error.message === 'ALREADY_EXISTS') {
                 await interaction.reply({
-                    embeds: [
-                        new EmbedBuilder()
-                            .setColor(Colours.error)
-                            .setTitle('Already approved')
-                            .setDescription(`Server \`${serverId}\` is already approved for Firesong Herald bot testing.`),
-                    ],
+                    embeds: [errorEmbed(`Server \`${serverId}\` is already approved for Firesong Herald bot testing.`, 'Already approved')],
                 });
                 return;
             }
 
             logger.error({ err: error }, '❌ [admin] approve-server failed');
             await interaction.reply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setColor(Colours.error)
-                        .setTitle('Something went wrong')
-                        .setDescription('Failed to approve server. Please try again later.'),
-                ],
+                embeds: [errorEmbed('Failed to approve server. Please try again later.', 'Something went wrong')],
                 ephemeral: true,
             });
         }
@@ -273,36 +226,24 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
             await revokeServer(serverId, interaction.user.id);
 
             await interaction.reply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setColor(Colours.admin)
-                        .setTitle('Server approval revoked')
-                        .setDescription(`Server \`${serverId}\` has been removed from Firesong Herald bot testing.`)
-                        .setFooter({ text: `Actioned by ${interaction.user.username}` })
-                        .setTimestamp(),
-                ],
+                embeds: [buildEmbed({
+                    colour: 'admin',
+                    title: 'Server approval revoked',
+                    description: `Server \`${serverId}\` has been removed from Firesong Herald bot testing.`,
+                    footer: `Actioned by ${interaction.user.username}`,
+                })],
             });
         } catch (error) {
             if (error instanceof Error && error.message === 'NOT_FOUND') {
                 await interaction.reply({
-                    embeds: [
-                        new EmbedBuilder()
-                            .setColor(Colours.error)
-                            .setTitle('Not found')
-                            .setDescription(`Server \`${serverId}\` is not currently approved for Firesong Herald bot testing.`),
-                    ],
+                    embeds: [errorEmbed(`Server \`${serverId}\` is not currently approved for Firesong Herald bot testing.`, 'Not found')],
                 });
                 return;
             }
 
             logger.error({ err: error }, '❌ [admin] revoke-server failed');
             await interaction.reply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setColor(Colours.error)
-                        .setTitle('Something went wrong')
-                        .setDescription('Failed to revoke server. Please try again later.'),
-                ],
+                embeds: [errorEmbed('Failed to revoke server. Please try again later.', 'Something went wrong')],
                 ephemeral: true,
             });
         }
