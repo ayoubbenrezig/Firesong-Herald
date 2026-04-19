@@ -8,16 +8,16 @@
 
 ## Tech Stack
 
-| Layer | Technology | Why |
-|---|---|---|
-| Bot | Node.js + Discord.js | Bot is already Node, stays one language |
-| Backend API | Node.js + Fastify | Lightweight, fast, same runtime as bot |
-| Database | PostgreSQL | Relational data, signups, events, roles all have relationships |
-| ORM | Prisma | Translates JS to SQL, auto-generates types from DB schema |
-| Frontend | SvelteKit | Compiles to vanilla JS, no runtime overhead, file-based routing |
-| Language | TypeScript throughout | Types everywhere, catches bugs at write time, zero runtime cost |
-| Real-time | WebSockets inside Fastify | Live sync between Discord and dashboard |
-| Logging | Pino | Structured JSON logging, low overhead, built into Fastify |
+| Layer       | Technology                | Why                                                             |
+|-------------|---------------------------|-----------------------------------------------------------------|
+| Bot         | Node.js + Discord.js      | Bot is already Node, stays one language                         |
+| Backend API | Node.js + Fastify         | Lightweight, fast, same runtime as bot                          |
+| Database    | PostgreSQL                | Relational data, signups, events, roles all have relationships  |
+| ORM         | Prisma                    | Translates JS to SQL, auto-generates types from DB schema       |
+| Frontend    | SvelteKit                 | Compiles to vanilla JS, no runtime overhead, file-based routing |
+| Language    | TypeScript throughout     | Types everywhere, catches bugs at write time, zero runtime cost |
+| Real-time   | WebSockets inside Fastify | Live sync between Discord and dashboard                         |
+| Logging     | Pino                      | Structured JSON logging, low overhead, built into Fastify       |
 
 ---
 
@@ -39,10 +39,10 @@ SvelteKit Dashboard
 
 ## Release Stages
 
-| Stage | Audience |
-|---|---|
-| Alpha | Closed, test community only |
-| Beta | Wider testing, more stable |
+| Stage        | Audience                         |
+|--------------|----------------------------------|
+| Alpha        | Closed, test community only      |
+| Beta         | Wider testing, more stable       |
 | Full Release | Public, ready to sell or publish |
 
 ---
@@ -149,25 +149,25 @@ Per server, completely isolated by `discord_server_id`. Owner designates which D
 
 One DB, isolated by `discord_server_id`. No cross-server data leakage ever.
 
-| Table | Purpose |
-|---|---|
-| `servers` | Discord servers that have added the bot |
-| `server_roles` | Role IDs granted admin or host permissions per server |
-| `events` | Community events with full lifecycle management |
-| `event_recurrence` | Recurrence config for repeating events |
-| `rsvp_options` | Named signup slots per event |
-| `signups` | User signups for a specific RSVP option |
-| `event_alerts` | Scheduled reminders for events |
-| `calendars` | Scheduled calendar posts per server |
-| `users` | Lazy-created user records for preference storage |
-| `user_reminder_presets` | Saved reminder timing presets per user |
-| `audit_logs` | Admin and mod action history |
+| Table                   | Purpose                                               |
+|-------------------------|-------------------------------------------------------|
+| `servers`               | Discord servers that have added the bot               |
+| `server_roles`          | Role IDs granted admin or host permissions per server |
+| `events`                | Community events with full lifecycle management       |
+| `event_recurrence`      | Recurrence config for repeating events                |
+| `rsvp_options`          | Named signup slots per event                          |
+| `signups`               | User signups for a specific RSVP option               |
+| `event_alerts`          | Scheduled reminders for events                        |
+| `calendars`             | Scheduled calendar posts per server                   |
+| `users`                 | Lazy-created user records for preference storage      |
+| `user_reminder_presets` | Saved reminder timing presets per user                |
+| `audit_logs`            | Admin and mod action history                          |
 
 ---
 
 ## Permission Handling
 
-On bot join and on dashboard load — fetch bot's current permissions, compare against required list, map to human-readable descriptions, display on dashboard with clear explanation of what breaks without each permission. WebSocket pushes updates instantly if something changes.
+On bot join and on dashboard load, fetch bot's current permissions, compare against required list, map to human-readable descriptions, display on dashboard with clear explanation of what breaks without each permission. WebSocket pushes updates instantly if something changes.
 
 ---
 
@@ -175,7 +175,7 @@ On bot join and on dashboard load — fetch bot's current permissions, compare a
 
 1. ✅ DB schema in Prisma
 2. ✅ Event service (store and retrieve events)
-3. Discord OAuth2 auth
+3. ✅ Discord OAuth2 auth
 4. Event creation slash command
 5. RSVP slash commands
 6. Audit logging
@@ -186,7 +186,7 @@ On bot join and on dashboard load — fetch bot's current permissions, compare a
 
 ## Deployment
 
-Domain → DNS A record → VPS IP → Nginx reverse proxy → Fastify API + Svelte static files. SSL via Certbot, free, auto-renews. Platforms like Railway or Render handle all of that automatically if you don't want to touch server config manually.
+Domain → DNS A record → VPS IP → Caddy reverse proxy → Fastify API + SvelteKit Node server. Caddy handles HTTPS automatically via Let's Encrypt. Platforms like Railway or Render handle all of that automatically if you don't want to touch server config manually.
 
 ---
 

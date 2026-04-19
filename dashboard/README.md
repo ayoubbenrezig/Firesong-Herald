@@ -1,42 +1,36 @@
-# sv
+# Firesong Herald: Dashboard
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+SvelteKit web dashboard for Firesong Herald. Provides Discord OAuth2 authentication, a landing page, and the event management interface.
 
-## Creating a project
+## Tech Stack
 
-If you're seeing this, you've probably already done this step. Congrats!
+- SvelteKit 2, Svelte 5
+- TypeScript (strict mode)
+- Tailwind CSS v4
+- Skeleton UI v4
+- Phosphor Svelte icons
+- Vite, adapter-node (Node.js server output)
 
-```sh
-# create a new project
-npx sv create my-app
+## Development
+
+From the `dashboard/` directory:
+
+```bash
+npm install
+npm run dev       # Vite dev server at http://localhost:5173
+npm run build     # Compile to production Node.js server
+npm run check     # Type-check with svelte-check
+npm run lint      # Prettier + ESLint
+npm run format    # Auto-format with Prettier
+npm test          # Run Vitest unit tests
 ```
 
-To recreate this project with the same configuration:
+Environment variables are read from `.env` in the project root. See the [project root](../) for the full variable reference.
 
-```sh
-# recreate this project
-npx sv@0.15.0 create --template minimal --types ts --add prettier eslint vitest="usages:component,unit" tailwindcss="plugins:typography" --install npm dashboard
-```
+## Production
 
-## Developing
+In production, the dashboard is compiled to a Node.js server via `@sveltejs/adapter-node` and served behind the Caddy reverse proxy. See `compose.yml` and `Caddyfile` at the project root.
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Project Documentation
 
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```sh
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+See the [project root](../) for setup instructions, contributing guidelines, and the full architecture overview.

@@ -2,17 +2,18 @@
 
 ## Overview
 
-The project uses TypeScript throughout — bot, API, and dashboard. This document covers the setup, conventions, and key decisions made across the stack.
+The project uses TypeScript throughout: bot, API, and dashboard. This document covers the setup, conventions, and key decisions made across the stack.
 
 ---
 
 ## Workspaces
 
-| Workspace | Path | Runtime |
-|---|---|---|
-| Bot | `bot/` | Node.js + tsx (dev), tsc (prod) |
-| Database | `db/` | Prisma CLI only |
-| Dashboard | `dashboard/` | SvelteKit + Vite |
+| Workspace | Path         | Runtime                         |
+|-----------|--------------|---------------------------------|
+| Bot       | `bot/`       | Node.js + tsx (dev), tsc (prod) |
+| API       | `api/`       | Node.js + tsx (dev), tsc (prod) |
+| Database  | `db/`        | Prisma CLI only                 |
+| Dashboard | `dashboard/` | SvelteKit + Vite                |
 
 Each workspace has its own `package.json`, `tsconfig.json`, and `node_modules`.
 
@@ -23,17 +24,26 @@ Each workspace has its own `package.json`, `tsconfig.json`, and `node_modules`.
 **Bot:**
 ```bash
 cd bot
+npm run dev     # runs tsx src/index.ts with hot reload
+npm run deploy  # registers slash commands with Discord
+npm run build   # compiles to dist/
+npm start       # runs dist/index.js
+npm test        # runs Vitest
+```
+
+**API:**
+```bash
+cd api
 npm run dev    # runs tsx src/index.ts with hot reload
 npm run build  # compiles to dist/
 npm start      # runs dist/index.js
-npm test       # runs Vitest
 ```
 
 **Dashboard:**
 ```bash
 cd dashboard
 npm run dev    # Vite dev server
-npm run build  # compiles to static assets
+npm run build  # compiles to production Node.js server
 ```
 
 ---
@@ -43,17 +53,29 @@ npm run build  # compiles to static assets
 ```
 bot/
   src/
-    commands/       # slash commands by category
+    commands/       # slash commands by category (admin, owner, scheduling, utility)
     handlers/       # Discord.js event and command loaders
+    scripts/        # standalone scripts (e.g. slash command deployment)
     services/       # database and business logic
-    utils/          # shared utilities (logger, etc.)
+    tests/          # Vitest unit tests
+    utils/          # shared utilities (logger, colours, emojis)
     index.ts        # entry point
-  tests/            # Vitest unit tests
+  tsconfig.json
+  vitest.config.ts
+
+api/
+  src/
+    lib/            # shared instances (prisma client, logger)
+    plugins/        # Fastify plugin wrappers
+    routes/         # route handlers (auth, health, config, servers, testers, users)
+    tests/          # Vitest unit tests
+    index.ts        # entry point
   tsconfig.json
   vitest.config.ts
 
 db/
   prisma/
+    migrations/     # Prisma migration history
     schema.prisma   # database schema
   generated/
     prisma/         # auto-generated Prisma client
@@ -61,7 +83,8 @@ db/
 
 dashboard/
   src/
-    ...             # SvelteKit pages and components
+    lib/            # shared components, utilities, stores
+    routes/         # SvelteKit file-based routing
 ```
 
 ---
@@ -81,7 +104,7 @@ Both bot and dashboard use strict mode:
 
 ## Prisma Integration
 
-Prisma 7 generates the client to a custom output path. Import from the generated path — not from `@prisma/client`:
+Prisma 7 generates the client to a custom output path. Import from the generated path, not from `@prisma/client`:
 
 ```typescript
 import { PrismaClient } from '../../db/generated/prisma/client';
@@ -91,7 +114,7 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 export const prisma = new PrismaClient({ adapter });
 ```
 
-Prisma 7 requires a driver adapter — `PrismaPg` is used for PostgreSQL. Calling `new PrismaClient()` without an adapter will throw at runtime.
+Prisma 7 requires a driver adapter. `PrismaPg` is used for PostgreSQL. Calling `new PrismaClient()` without an adapter will throw at runtime.
 
 After any schema change, regenerate the client:
 
@@ -103,7 +126,7 @@ cd db && npx prisma generate
 
 ## Logging
 
-All logging goes through the centralised Pino logger — never use `console.*` directly:
+All logging goes through the centralised Pino logger. Never use `console.*` directly:
 
 ```typescript
 import { logger } from '../utils/logger';
@@ -136,4 +159,4 @@ TypeScript strict mode is enabled in all workspaces. This means:
 - Null/undefined safety enforced
 - Function return types checked
 
-This is intentional — it catches bugs early and keeps the codebase maintainable.
+This is intentional: it catches bugs early and keeps the codebase maintainable.

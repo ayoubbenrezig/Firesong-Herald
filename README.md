@@ -1,6 +1,6 @@
 # Firesong Herald
 
-A Discord bot for event management — signups, RSVPs, reminders, and a live web dashboard.
+A Discord bot for event management: signups, RSVPs, reminders, and a live web dashboard.
 
 ## Setup
 
@@ -34,10 +34,19 @@ git clone https://github.com/ayoubbenrezig/Firesong-Herald.git
 cd Firesong-Herald
 ```
 
-2. Create a `.env` file in the root directory
+2. Copy `.env.example` to `.env` and fill in your values
+```bash
+cp .env.example .env
+```
+
+Required variables:
 ```env
 DISCORD_TOKEN=your_bot_token_here
-CLIENT_ID=your_client_id_here
+DISCORD_CLIENT_ID=your_client_id_here
+DISCORD_GUILD_ID=your_dev_guild_id_here
+DISCORD_CLIENT_SECRET=your_client_secret_here
+DISCORD_REDIRECT_URI=http://localhost:3001/auth/discord/callback
+JWT_SECRET=your_jwt_secret_here
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=password
 POSTGRES_DB=firesong_db
@@ -46,6 +55,7 @@ DATABASE_URL=postgresql://postgres:password@db:5432/firesong_db
 API_PORT=3001
 API_HOST=0.0.0.0
 DASHBOARD_URL=http://localhost:5173
+BOT_INVITE_URL=your_bot_invite_url_here
 ```
 
 3. Install dependencies
@@ -60,23 +70,23 @@ cd db && npx prisma generate && cd ..
 
 5. Start the stack
 ```bash
-# Database only
-docker compose up db
-
-# Full stack (database + bot)
-docker compose --profile bot up
+docker compose -f compose.dev.yml up --build
 ```
 
-6. Start the API (separate terminal)
+Runs all services (db, bot, api, dashboard) with watch mode. Services rebuild when source files change.
+
+### Production
+
 ```bash
-cd api && npm run dev
+docker compose up --build
 ```
 
 ## Alpha Features
 
 ### Events
-- [ ] Create, edit, delete events with slash commands and modals
-- [ ] Soft delete with grace period
+- [x] Create events via slash command and modal
+- [ ] Edit an event
+- [ ] Delete an event with soft delete and grace period
 - [ ] Repeating / recurring events
 - [ ] Tags for organization
 - [ ] Auto-post to configured channel
@@ -93,7 +103,8 @@ cd api && npm run dev
 - [ ] Basic audit log tracking
 
 ### Dashboard (Alpha)
-- [ ] Discord OAuth2 authentication
+- [x] Landing page with Discord OAuth2 sign-in
+- [x] Tester access gating
 - [ ] Event management UI
 - [ ] RSVP management interface
 - [ ] Live sync via WebSockets

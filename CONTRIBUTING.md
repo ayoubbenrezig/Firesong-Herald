@@ -1,6 +1,6 @@
 # Contributing to Firesong Herald
 
-Firesong Herald is an open-source Discord event management bot with a web dashboard, licensed under AGPL-3.0. Contributions are welcome.
+Firesong Herald is an open-source Discord event management bot with a web dashboard, licenced under AGPL-3.0. Contributions are welcome.
 
 Please read this document before opening issues or pull requests.
 
@@ -34,33 +34,19 @@ Add this line, save, and restart PowerShell:
 
 1. Fork the repository
 2. Clone your fork locally
-3. Install dependencies in each workspace:
+3. Copy `.env.example` to `.env` and fill in your local values
+4. Install dependencies in each workspace:
    ```bash
    cd bot && npm install && cd ../api && npm install && cd ../db && npm install && cd ../dashboard && npm install && cd ..
    ```
-4. Generate the Prisma client:
+5. Generate the Prisma client:
    ```bash
    cd db && npx prisma generate && cd ..
    ```
-5. Copy `.env.example` to `.env` and fill in your local values
-6. Start the database only:
+6. Start the stack:
    ```bash
-   docker compose up db
+   docker compose -f compose.dev.yml up --build
    ```
-7. Start the API (separate terminal):
-   ```bash
-   cd api && npm run dev
-   ```
-8. Start the bot (separate terminal):
-   ```bash
-   cd bot && npm run dev
-   ```
-9. Start the dashboard (separate terminal):
-   ```bash
-   cd dashboard && npm run dev
-   ```
-
-> To run the full stack in Docker instead, use `docker compose up --build`.
 
 ---
 
