@@ -1,8 +1,8 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { browser } from '$app/environment';
-    import { THEMES, setTheme, previewTheme, type ThemeId } from '$lib/theme';
-    import { toggleMode } from '$lib/mode';
+    import { THEMES, setTheme, previewTheme, type ThemeId } from '$lib/theme.svelte';
+    import { toggleMode } from '$lib/mode.svelte';
 
     function getCurrentTheme(): ThemeId {
         if (!browser) return 'catppuccin';

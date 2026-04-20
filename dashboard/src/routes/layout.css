@@ -52,7 +52,7 @@
 .nav-polished {
     width: 100%;
     box-sizing: border-box;
-    background-color: color-mix(in oklab, var(--color-surface-950) 75%, transparent);
+    background-color: var(--color-surface-950);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid color-mix(in oklab, var(--color-primary-500) 10%, transparent);
@@ -194,11 +194,10 @@ h2 {
 
 .mobile-bottom-bar {
     position: fixed;
-    bottom: 1rem;
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(100% - 2.5rem);
-    max-width: 480px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
     z-index: 50;
 }
 
@@ -206,15 +205,10 @@ h2 {
     display: flex;
     align-items: center;
     justify-content: space-around;
-    padding: 0.75rem 1.25rem;
-    border-radius: 1.25rem;
-    background-color: color-mix(in oklab, var(--color-surface-950) 80%, transparent);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid color-mix(in oklab, var(--color-primary-500) 20%, transparent);
-    box-shadow:
-            0 4px 24px rgba(0, 0, 0, 0.35),
-            inset 0 1px 0 0 color-mix(in oklab, var(--color-primary-400) 12%, transparent);
+    padding: 0.75rem 1rem;
+    background-color: var(--color-surface-950);
+    border-top: 1px solid color-mix(in oklab, var(--color-primary-500) 15%, transparent);
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.3);
 }
 
 .mobile-bar-btn {
@@ -397,7 +391,7 @@ h2 {
 }
 
 [data-mode="light"] .nav-polished {
-    background-color: color-mix(in oklab, var(--color-surface-100), transparent);
+    background-color: var(--color-surface-100);
     border-bottom-color: color-mix(in oklab, var(--color-surface-400) 20%, transparent);
     box-shadow:
             0 4px 24px rgba(0, 0, 0, 0.06),
@@ -409,4 +403,10 @@ h2 {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     filter: none;
+}
+
+[data-mode="light"] .mobile-bottom-inner {
+    background-color: var(--color-surface-100);
+    border-top-color: color-mix(in oklab, var(--color-surface-400) 20%, transparent);
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
 }

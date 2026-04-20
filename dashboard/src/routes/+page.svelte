@@ -1,12 +1,12 @@
 <script lang="ts">
-    import { browser } from '$app/environment';
-    import { SunIcon, MoonIcon, CaretDownIcon, SignOutIcon, TestTubeIcon, LockIcon } from 'phosphor-svelte';
-    import { toggleMode } from '$lib/mode';
+    import { CaretDownIcon, SignOutIcon, TestTubeIcon, LockIcon, GearIcon } from 'phosphor-svelte';
     import MobileBottomBar from '$lib/components/MobileBottomBar.svelte';
     import RefreshButton from '$lib/components/RefreshButton.svelte';
+    import DarkModeButton from '$lib/components/DarkModeButton.svelte';
     import TesterModal from '$lib/components/TesterModal.svelte';
     import ThankYouModal from '$lib/components/ThankYouModal.svelte';
     import DeleteAccountModal from '$lib/components/DeleteAccountModal.svelte';
+    import { openSettings } from '$lib/settings.svelte';
 
     // ── Props ─────────────────────────────────────────────────────────────────
 
@@ -49,20 +49,6 @@
             description: 'Automatic event reminders keep your community informed and ready to show up.',
         },
     ];
-
-    // ── Dark mode ─────────────────────────────────────────────────────────────
-
-    function isDark(): boolean {
-        if (!browser) return false;
-        return document.documentElement.getAttribute('data-mode') === 'dark';
-    }
-
-    let dark = $state(isDark());
-
-    function handleToggle(): void {
-        toggleMode();
-        dark = !dark;
-    }
 
     // ── User dropdown ─────────────────────────────────────────────────────────
 
@@ -118,6 +104,11 @@
     function closeDeleteAccountModal(): void {
         deleteAccountModalOpen = false;
     }
+
+    function handleOpenSettings(): void {
+        dropdownOpen = false;
+        openSettings();
+    }
 </script>
 
 <svelte:head>
@@ -128,8 +119,8 @@
 <div class="min-h-screen flex flex-col">
 
     <!-- Nav -->
-    <nav class="nav-polished px-8 py-5 sticky top-0 z-50 mx-auto">
-        <div class="mx-auto flex items-center justify-between max-w-5xl">
+    <nav class="nav-polished px-4 py-3 min-[920px]:px-8 min-[920px]:py-5 sticky top-0 z-50 w-full">
+        <div class="mx-auto flex items-center justify-between w-full min-[920px]:max-w-5xl">
             <span class="brand-text">Firesong Herald</span>
 
             <!-- Desktop — hidden below 920px -->
@@ -142,17 +133,7 @@
                     <a href="/app" class="nav-link">Dashboard</a>
                 {/if}
 
-                <button
-                        onclick={handleToggle}
-                        class="cursor-pointer p-1.5 rounded-full hover:bg-white/10 transition-colors"
-                        aria-label="Toggle dark mode"
-                >
-                    {#if dark}
-                        <SunIcon class="size-4" />
-                    {:else}
-                        <MoonIcon class="size-4" />
-                    {/if}
-                </button>
+                <DarkModeButton size={4} />
 
                 {#if user}
                     <div class="relative">
@@ -181,6 +162,14 @@
                                     onclick={closeDropdown}
                             ></div>
                             <div class="absolute right-0 mt-2 w-44 rounded-xl border border-surface-200 dark:border-surface-800 bg-surface-100 dark:bg-surface-900 shadow-xl z-50 overflow-hidden">
+                                <button
+                                        type="button"
+                                        onclick={handleOpenSettings}
+                                        class="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-surface-700 dark:text-surface-300 hover:bg-surface-200 dark:hover:bg-surface-800 transition-colors"
+                                >
+                                    <GearIcon class="size-4" />
+                                    Settings
+                                </button>
                                 <a
                                         href="/logout"
                                         class="flex items-center gap-2.5 px-4 py-3 text-sm text-surface-700 dark:text-surface-300 hover:bg-surface-200 dark:hover:bg-surface-800 transition-colors"
@@ -207,19 +196,9 @@
             </div>
 
             <!-- Mobile controls — visible below 920px only -->
-            <div class="min-[920px]:hidden flex items-center gap-1">
+            <div class="min-[920px]:hidden flex items-center gap-3">
                 <RefreshButton size={5} />
-                <button
-                        onclick={handleToggle}
-                        class="cursor-pointer p-1.5 rounded-full hover:bg-white/10 transition-colors"
-                        aria-label="Toggle dark mode"
-                >
-                    {#if dark}
-                        <SunIcon class="size-5" />
-                    {:else}
-                        <MoonIcon class="size-5" />
-                    {/if}
-                </button>
+                <DarkModeButton size={5} />
             </div>
         </div>
     </nav>

@@ -11,7 +11,9 @@
         SignOutIcon,
         TestTubeIcon,
         TrashIcon,
+        GearIcon,
     } from 'phosphor-svelte';
+    import { openSettings } from '$lib/settings.svelte';
 
     // ── Props ─────────────────────────────────────────────────────────────────
 
@@ -127,6 +129,11 @@
         onDeleteAccount();
     }
 
+    function handleOpenSettings(): void {
+        closeAll();
+        openSettings();
+    }
+
     // ── Nav info items ────────────────────────────────────────────────────────
 
     const navItems = $derived([
@@ -169,9 +176,8 @@
             <a href="/privacy" class="mobile-menu-link">Privacy</a>
             <a href="/tos" class="mobile-menu-link">Terms</a>
             {#if !isInstalled}
-                <button onclick={openInstallPrompt} class="mobile-menu-link">
+                <button onclick={openInstallPrompt} class="mobile-menu-link" aria-label="Add to Home Screen">
                     <DownloadSimpleIcon class="size-5" />
-                    <span>Add to Home Screen</span>
                 </button>
             {/if}
         </div>
@@ -179,33 +185,56 @@
 
     <!-- User popup -->
     {#if userOpen && user}
-        <div class="mobile-menu-popup">
-            <div class="mobile-menu-link opacity-60 pointer-events-none text-xs">
-                {user.globalName ?? user.username}
+        <div class="mobile-info-popup">
+            <!-- Greeting -->
+            <div class="flex items-center gap-3 mb-3 pb-3 border-b border-surface-200 dark:border-surface-800 w-full">
+                <img
+                        src={avatarUrl(user.discordId, user.avatar)}
+                        alt="{user.globalName ?? user.username}'s avatar"
+                        class="size-9 rounded-full"
+                />
+                <div>
+                    <p class="text-sm font-semibold">Hi, {user.globalName ?? user.username}</p>
+                    {#if isTester}
+                        <p class="text-xs opacity-50">Tester</p>
+                    {:else}
+                        <p class="text-xs opacity-50">Not a tester</p>
+                    {/if}
+                </div>
             </div>
-            {#if isTester}
-                <button onclick={() => { closeAll(); onThankYou(); }} class="mobile-menu-link">
-                    <TestTubeIcon class="size-5" />
-                    <span>You're a tester</span>
-                </button>
-                {#if botInviteUrl}
-                    <a href={botInviteUrl} target="_blank" rel="noopener noreferrer" class="mobile-menu-link">
-                        Add to Server
-                    </a>
+
+            <!-- Actions -->
+            <div class="mobile-info-grid">
+                {#if isTester}
+                    <button onclick={() => { closeAll(); onThankYou(); }} class="mobile-menu-link">
+                        <TestTubeIcon class="size-5" />
+                        <span>You're a tester</span>
+                    </button>
+                    {#if botInviteUrl}
+                        <a href={botInviteUrl} target="_blank" rel="noopener noreferrer" class="mobile-menu-link">
+                            <SquaresFourIcon class="size-5" />
+                            <span>Add to Server</span>
+                        </a>
+                    {/if}
+                {:else}
+                    <button onclick={() => { closeAll(); onBecomeTester(); }} class="mobile-menu-link">
+                        <TestTubeIcon class="size-5" />
+                        <span>Become a Tester</span>
+                    </button>
                 {/if}
-            {:else}
-                <button onclick={() => { closeAll(); onBecomeTester(); }} class="mobile-menu-link">
-                    Become a Tester
+                <button onclick={handleOpenSettings} class="mobile-menu-link">
+                    <GearIcon class="size-5" />
+                    <span>Settings</span>
                 </button>
-            {/if}
-            <a href="/logout" class="mobile-menu-link">
-                <SignOutIcon class="size-5" />
-                <span>Sign out</span>
-            </a>
-            <button onclick={handleDeleteAccount} class="mobile-menu-link text-error-500">
-                <TrashIcon class="size-5" />
-                <span>Delete account</span>
-            </button>
+                <a href="/logout" class="mobile-menu-link">
+                    <SignOutIcon class="size-5" />
+                    <span>Sign out</span>
+                </a>
+                <button onclick={handleDeleteAccount} class="mobile-menu-link text-error-500">
+                    <TrashIcon class="size-5" />
+                    <span>Delete account</span>
+                </button>
+            </div>
         </div>
     {/if}
 
@@ -244,7 +273,7 @@
         {:else}
             <button
                     type="button"
-                    onclick={() => { closeAll(); user ? onBecomeTester() : onBecomeTester(); }}
+                    onclick={() => { closeAll(); onBecomeTester(); }}
                     class="mobile-bar-btn"
                     aria-label="Become a tester"
             >

@@ -1,6 +1,6 @@
 <script lang="ts">
     import { Navigation } from '@skeletonlabs/skeleton-svelte';
-    import { HouseIcon, PaletteIcon, ArrowLineLeftIcon, ArrowLineRightIcon, XIcon, SquaresFourIcon } from 'phosphor-svelte';
+    import { HouseIcon, ArrowLineLeftIcon, ArrowLineRightIcon, XIcon, SquaresFourIcon } from 'phosphor-svelte';
     import { layout } from '$lib/layout.svelte';
 </script>
 
@@ -39,22 +39,12 @@
     <Navigation.Content>
         <Navigation.Menu class="px-2 space-y-1">
             <Navigation.Trigger
-                    onclick={() => layout.setActiveView('home')}
-                    class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:bg-surface-500/10 {layout.activeView === 'home' ? 'bg-primary-500/10 text-primary-400' : 'opacity-70 hover:opacity-100'}"
+                    onclick={() => {}}
+                    class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:bg-surface-500/10 bg-primary-500/10 text-primary-400"
             >
                 <SquaresFourIcon class="size-5 shrink-0" />
                 {#if layout.expanded || layout.isMobile}
                     <Navigation.TriggerText class="font-medium">Dashboard</Navigation.TriggerText>
-                {/if}
-            </Navigation.Trigger>
-
-            <Navigation.Trigger
-                    onclick={() => layout.setActiveView('theme')}
-                    class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all hover:bg-surface-500/10 {layout.activeView === 'theme' ? 'bg-primary-500/10 text-primary-400' : 'opacity-70 hover:opacity-100'}"
-            >
-                <PaletteIcon class="size-5 shrink-0" />
-                {#if layout.expanded || layout.isMobile}
-                    <Navigation.TriggerText class="font-medium">Theme</Navigation.TriggerText>
                 {/if}
             </Navigation.Trigger>
         </Navigation.Menu>

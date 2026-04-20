@@ -2,8 +2,7 @@
     import { onMount } from 'svelte';
     import '../layout.css';
     import Sidebar from '$lib/components/Sidebar.svelte';
-    import ThemePanel from '$lib/components/ThemePanel.svelte';
-    import { layout } from '$lib/layout.svelte.js';
+    import { layout } from '$lib/layout.svelte';
 
     let { children } = $props();
 
@@ -40,10 +39,6 @@
     {/if}
 
     <main class="flex-1 overflow-y-auto {layout.isMobile ? 'pt-16' : ''}">
-        {#if layout.activeView === 'home'}
-            {@render children()}
-        {:else if layout.activeView === 'theme'}
-            <ThemePanel />
-        {/if}
+        {@render children()}
     </main>
 </div>
