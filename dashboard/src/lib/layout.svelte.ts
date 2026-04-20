@@ -1,18 +1,15 @@
 const BREAKPOINT = 1024;
+const SWIPE_EDGE_THRESHOLD = 30;   // px from left edge to start swipe
+const SWIPE_MIN_DISTANCE   = 60;   // px minimum horizontal travel
+const SWIPE_AXIS_RATIO     = 2;    // horizontal must be 2× vertical to count
 
 function createLayoutState() {
-    let isMobile = $state(false);
+    let isMobile   = $state(false);
     let mobileOpen = $state(false);
-    let expanded = $state(true);
-    let activeView = $state<'home' | 'theme'>('home');
+    let expanded   = $state(true);
 
     function init(): () => void {
-        // Restore persisted state
         try {
-            const savedView = localStorage.getItem('activeView') as 'home' | 'theme';
-            const validViews = ['home', 'theme'] as const;
-            if (savedView && validViews.includes(savedView)) activeView = savedView;
-
             const savedExpanded = localStorage.getItem('sidebarExpanded');
             if (savedExpanded !== null) expanded = savedExpanded === 'true';
         } catch {
@@ -24,19 +21,40 @@ function createLayoutState() {
             if (!isMobile) mobileOpen = false;
         }
 
+        // ── Swipe-to-open gesture ─────────────────────────────────────────────
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        function handleTouchStart(e: TouchEvent): void {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }
+
+        function handleTouchEnd(e: TouchEvent): void {
+            if (!isMobile || mobileOpen) return;
+
+            const dx = e.changedTouches[0].clientX - touchStartX;
+            const dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
+
+            const startedAtEdge = touchStartX <= SWIPE_EDGE_THRESHOLD;
+            const movedEnough   = dx >= SWIPE_MIN_DISTANCE;
+            const clearlyHoriz  = dx > dy * SWIPE_AXIS_RATIO;
+
+            if (startedAtEdge && movedEnough && clearlyHoriz) {
+                mobileOpen = true;
+            }
+        }
+
         handleResize();
         window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }
+        document.addEventListener('touchstart', handleTouchStart, { passive: true });
+        document.addEventListener('touchend',   handleTouchEnd,   { passive: true });
 
-    function setActiveView(view: 'home' | 'theme'): void {
-        activeView = view;
-        mobileOpen = false;
-        try {
-            localStorage.setItem('activeView', view);
-        } catch {
-            console.error('Failed to persist active view:', view);
-        }
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            document.removeEventListener('touchstart', handleTouchStart);
+            document.removeEventListener('touchend',   handleTouchEnd);
+        };
     }
 
     function setExpanded(value: boolean): void {
@@ -57,17 +75,14 @@ function createLayoutState() {
     }
 
     return {
-        get isMobile() { return isMobile; },
+        get isMobile()   { return isMobile;   },
         get mobileOpen() { return mobileOpen; },
-        get expanded() { return expanded; },
-        get activeView() { return activeView; },
+        get expanded()   { return expanded;   },
         init,
-        setActiveView,
         setExpanded,
         toggleMobileOpen,
-        closeMobile
+        closeMobile,
     };
 }
 
 export const layout = createLayoutState();
-export type View = 'home' | 'theme';

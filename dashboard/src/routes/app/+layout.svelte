@@ -2,10 +2,23 @@
     import { onMount } from 'svelte';
     import '../layout.css';
     import Sidebar from '$lib/components/Sidebar.svelte';
-    import ThemePanel from '$lib/components/ThemePanel.svelte';
-    import { layout } from '$lib/layout.svelte.js';
+    import TopBar from '$lib/components/TopBar.svelte';
+    import AppBottomBar from '$lib/components/AppBottomBar.svelte';
+    import { layout } from '$lib/layout.svelte';
 
-    let { children } = $props();
+    interface Props {
+        data: {
+            user: {
+                discordId: string;
+                username: string;
+                globalName: string | null;
+                avatar: string | null;
+            };
+        };
+        children: import('svelte').Snippet;
+    }
+
+    let { data, children }: Props = $props();
 
     onMount(() => {
         return layout.init();
@@ -13,37 +26,36 @@
 </script>
 
 <div class="flex h-screen overflow-hidden">
-    {#if layout.isMobile}
-        {#if !layout.mobileOpen}
-            <button
-                    class="fixed top-4 left-4 z-50 btn preset-filled-surface-500"
-                    onclick={layout.toggleMobileOpen}
-                    aria-label="Open navigation"
-            >
-                ☰
-            </button>
-        {/if}
 
-        {#if layout.mobileOpen}
-            <div
-                    class="fixed inset-0 z-30 bg-black/50"
-                    onclick={layout.closeMobile}
-                    aria-hidden="true"
-            ></div>
-        {/if}
-
-        <div class="fixed top-0 left-0 z-40 h-full bg-surface-950 shadow-xl transition-transform duration-300 {layout.mobileOpen ? 'translate-x-0' : '-translate-x-full'}">
-            <Sidebar />
-        </div>
-    {:else}
-        <Sidebar />
+    <!-- Mobile backdrop -->
+    {#if layout.isMobile && layout.mobileOpen}
+        <div
+                class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+                onclick={layout.closeMobile}
+                aria-hidden="true"
+        ></div>
     {/if}
 
-    <main class="flex-1 overflow-y-auto {layout.isMobile ? 'pt-16' : ''}">
-        {#if layout.activeView === 'home'}
+    <!-- Sidebar — z-50 so it renders above everything during animation -->
+    <div
+            class="{layout.isMobile
+                ? 'fixed top-0 left-0 z-50 h-full transition-transform duration-300 ' + (layout.mobileOpen ? 'translate-x-0' : '-translate-x-full')
+                : 'relative z-10'}"
+    >
+        <Sidebar user={data.user} />
+    </div>
+
+    <!-- Main -->
+    <div class="flex flex-col flex-1 overflow-hidden">
+        <TopBar user={data.user} />
+        <main class="flex-1 overflow-y-auto {layout.isMobile ? 'pb-16' : ''}">
             {@render children()}
-        {:else if layout.activeView === 'theme'}
-            <ThemePanel />
-        {/if}
-    </main>
+        </main>
+    </div>
+
+    <!-- Mobile bottom bar -->
+    {#if layout.isMobile}
+        <AppBottomBar />
+    {/if}
+
 </div>

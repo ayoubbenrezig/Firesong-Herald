@@ -207,7 +207,7 @@ describe('isProtectedRoute', () => {
     it('returns true for nested app routes', () => {
         expect(isProtectedRoute('/app/events')).toBe(true);
         expect(isProtectedRoute('/app/events/123')).toBe(true);
-        expect(isProtectedRoute('/app/rsvp/abc/manage')).toBe(true);
+        expect(isProtectedRoute('/app/rsvps/abc/manage')).toBe(true);
     });
 
     it('returns true for /app/ with query string (as pathname only)', () => {
