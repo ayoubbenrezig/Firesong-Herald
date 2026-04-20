@@ -88,20 +88,21 @@
                     <!-- Theme label -->
                     <p class="text-sm mb-2">Colour theme</p>
 
-                    <!-- Theme grid — emoji only at all sizes -->
-                    <div class="grid grid-cols-6 min-[920px]:grid-cols-8 gap-1.5">
+                    <!-- Theme grid — emoji + label on wide, emoji only on narrow -->
+                    <div class="grid grid-cols-4 sm:grid-cols-5 gap-1.5">
                         {#each THEMES as theme (theme.id)}
                             <button
                                     onclick={() => handleSelect(theme.id)}
                                     aria-label="Select {theme.label} theme"
                                     aria-pressed={activeId === theme.id}
                                     title={theme.label}
-                                    class="flex items-center justify-center p-2 rounded-xl text-xl transition-all
+                                    class="flex flex-col items-center gap-1 px-1 py-2.5 rounded-xl text-xs transition-all
                                         {activeId === theme.id
                                             ? 'bg-black/10 dark:bg-white/10 ring-2 ring-black/20 dark:ring-white/30'
                                             : 'hover:bg-black/5 dark:hover:bg-white/5'}"
                             >
-                                {theme.emoji}
+                                <span class="text-xl leading-none">{theme.emoji}</span>
+                                <span class="hidden min-[920px]:block text-center opacity-60 leading-tight truncate w-full">{theme.label}</span>
                             </button>
                         {/each}
                     </div>

@@ -3,6 +3,7 @@
     import '../layout.css';
     import Sidebar from '$lib/components/Sidebar.svelte';
     import TopBar from '$lib/components/TopBar.svelte';
+    import AppBottomBar from '$lib/components/AppBottomBar.svelte';
     import { layout } from '$lib/layout.svelte';
 
     interface Props {
@@ -24,41 +25,37 @@
     });
 </script>
 
-<div class="flex h-screen overflow-hidden bg-surface-950">
+<div class="flex h-screen overflow-hidden">
 
-    <!-- Mobile overlay -->
+    <!-- Mobile backdrop -->
     {#if layout.isMobile && layout.mobileOpen}
         <div
-                class="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm"
+                class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
                 onclick={layout.closeMobile}
                 aria-hidden="true"
         ></div>
     {/if}
 
-    <!-- Mobile hamburger -->
-    {#if layout.isMobile && !layout.mobileOpen}
-        <button
-                class="fixed top-4 left-4 z-50 p-2 rounded-xl bg-surface-900 border border-surface-800 text-surface-400 hover:text-surface-200 transition-colors shadow-lg"
-                onclick={layout.toggleMobileOpen}
-                aria-label="Open navigation"
-        >
-            <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-        </button>
-    {/if}
-
-    <!-- Sidebar -->
-    <div class="{layout.isMobile ? 'fixed top-0 left-0 z-40 h-full transition-transform duration-300 ' + (layout.mobileOpen ? 'translate-x-0' : '-translate-x-full') : 'relative'}">
+    <!-- Sidebar — z-50 so it renders above everything during animation -->
+    <div
+            class="{layout.isMobile
+                ? 'fixed top-0 left-0 z-50 h-full transition-transform duration-300 ' + (layout.mobileOpen ? 'translate-x-0' : '-translate-x-full')
+                : 'relative z-10'}"
+    >
         <Sidebar user={data.user} />
     </div>
 
     <!-- Main -->
-    <div class="flex flex-col flex-1 overflow-hidden {layout.isMobile ? 'w-full' : ''}">
+    <div class="flex flex-col flex-1 overflow-hidden">
         <TopBar user={data.user} />
-        <main class="flex-1 overflow-y-auto">
+        <main class="flex-1 overflow-y-auto {layout.isMobile ? 'pb-16' : ''}">
             {@render children()}
         </main>
     </div>
+
+    <!-- Mobile bottom bar -->
+    {#if layout.isMobile}
+        <AppBottomBar />
+    {/if}
 
 </div>

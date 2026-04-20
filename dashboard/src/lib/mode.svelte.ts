@@ -4,9 +4,19 @@ const modeState = $state({ dark: false });
 
 export function initMode(): void {
     try {
-        const stored = localStorage.getItem('mode') ?? 'light';
-        modeState.dark = stored === 'dark';
-        document.documentElement.setAttribute('data-mode', stored);
+        const stored = localStorage.getItem('mode');
+        let mode: 'light' | 'dark';
+
+        if (stored === 'light' || stored === 'dark') {
+            // User has an explicit saved preference
+            mode = stored;
+        } else {
+            // First visit — use system preference
+            mode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+
+        modeState.dark = mode === 'dark';
+        document.documentElement.setAttribute('data-mode', mode);
     } catch {
         console.error('Failed to init mode');
     }

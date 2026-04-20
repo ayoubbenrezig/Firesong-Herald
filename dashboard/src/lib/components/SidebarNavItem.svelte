@@ -11,7 +11,15 @@
 
     let { href, label, icon: Icon, expanded }: Props = $props();
 
-    const isActive = $derived(page.url.pathname === href || page.url.pathname.startsWith(href + '/'));
+    /**
+     * Exact match for /app, prefix match for all sub-routes.
+     * Prevents /app from staying active when on /app/events etc.
+     */
+    const isActive = $derived(
+        href === '/app'
+            ? page.url.pathname === '/app'
+            : page.url.pathname === href || page.url.pathname.startsWith(href + '/')
+    );
 </script>
 
 <a
