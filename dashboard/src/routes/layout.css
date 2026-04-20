@@ -55,22 +55,11 @@
     background-color: var(--color-surface-950);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid color-mix(in oklab, var(--color-primary-500) 10%, transparent);
     box-shadow:
-            0 0 0 1px color-mix(in oklab, var(--color-primary-500) 8%, transparent),
-            0 4px 24px rgba(0, 0, 0, 0.35),
-            inset 0 1px 0 0 color-mix(in oklab, var(--color-primary-400) 15%, transparent);
+            0 0 0 1px color-mix(in oklab, var(--color-primary-500) 5%, transparent),
+            0 2px 12px color-mix(in oklab, black 20%, transparent);
     transition: all 0.3s ease;
 }
-
-.nav-polished:hover {
-    box-shadow:
-            0 0 0 1px color-mix(in oklab, var(--color-primary-500) 15%, transparent),
-            0 4px 32px rgba(0, 0, 0, 0.4),
-            inset 0 1px 0 0 color-mix(in oklab, var(--color-primary-400) 25%, transparent);
-}
-
-
 
 .nav-link {
     @apply transition-all duration-200 opacity-70 font-medium;
@@ -205,7 +194,7 @@ h2 {
     display: flex;
     align-items: center;
     justify-content: space-around;
-    padding: 0.75rem 1rem;
+    padding: 1rem 1.25rem;
     background-color: var(--color-surface-950);
     border-top: 1px solid color-mix(in oklab, var(--color-primary-500) 15%, transparent);
     box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.3);

@@ -55,7 +55,7 @@
             role="presentation"
             onclick={closeInfo}
     ></div>
-    <div class="fixed bottom-16 left-1/2 -translate-x-1/2 z-50 w-56
+    <div class="fixed bottom-22 left-1/2 -translate-x-1/2 z-50 w-56
         bg-surface-900 border border-surface-800 rounded-2xl shadow-xl p-4 space-y-3">
         <p class="text-xs font-semibold uppercase tracking-widest text-surface-500">Navigation</p>
         {#each allItems as item}
@@ -76,7 +76,7 @@
         class="fixed bottom-0 left-0 right-0 z-30 flex items-center
             bg-surface-950 border-t border-surface-800/60
             shadow-[0_-4px_24px_rgba(0,0,0,0.3)]
-            h-16 px-2"
+            h-20 px-2"
         aria-label="Mobile navigation"
 >
     <!-- Left items -->
@@ -90,7 +90,7 @@
                 class="flex items-center justify-center flex-1 h-full transition-colors
                     {active ? 'text-primary-400' : 'text-surface-500 hover:text-surface-300'}"
         >
-            <Icon class="size-6" />
+            <Icon class="size-7" />
         </a>
     {/each}
 
@@ -101,7 +101,7 @@
             aria-label="Navigation guide"
             class="flex items-center justify-center flex-1 h-full text-surface-500 hover:text-surface-300 transition-colors"
     >
-        <InfoIcon class="size-6" />
+        <InfoIcon class="size-7" />
     </button>
 
     <!-- Right items -->
@@ -115,7 +115,7 @@
                 class="flex items-center justify-center flex-1 h-full transition-colors
                     {active ? 'text-primary-400' : 'text-surface-500 hover:text-surface-300'}"
         >
-            <Icon class="size-6" />
+            <Icon class="size-7" />
         </a>
     {/each}
 </nav>
