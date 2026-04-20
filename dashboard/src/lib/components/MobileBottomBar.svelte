@@ -263,12 +263,12 @@
     <!-- Bar -->
     <div class="mobile-bottom-inner">
         <a href="/" class="mobile-bar-btn" aria-label="Home">
-            <HouseIcon class="size-6" />
+            <HouseIcon class="size-7" />
         </a>
 
         {#if user && isTester}
             <a href="/app" class="mobile-bar-btn" aria-label="Dashboard">
-                <SquaresFourIcon class="size-6" />
+                <SquaresFourIcon class="size-7" />
             </a>
         {:else}
             <button
@@ -277,12 +277,12 @@
                     class="mobile-bar-btn"
                     aria-label="Become a tester"
             >
-                <SquaresFourIcon class="size-6 opacity-30" />
+                <SquaresFourIcon class="size-7 opacity-30" />
             </button>
         {/if}
 
         <button onclick={toggleInfo} class="mobile-bar-btn" aria-label="Navigation info">
-            <InfoIcon class="size-6" />
+            <InfoIcon class="size-7" />
         </button>
 
         {#if user}
@@ -296,17 +296,17 @@
                 <img
                         src={avatarUrl(user.discordId, user.avatar)}
                         alt="{user.globalName ?? user.username}'s avatar"
-                        class="size-6 rounded-full"
+                        class="size-7 rounded-full"
                 />
             </button>
         {:else}
             <a href="/login" class="mobile-bar-btn" aria-label="Sign in">
-                <UserCircleIcon class="size-6" />
+                <UserCircleIcon class="size-7" />
             </a>
         {/if}
 
         <button onclick={toggleMenu} class="mobile-bar-btn" aria-label="More">
-            <ListIcon class="size-6" />
+            <ListIcon class="size-7" />
         </button>
     </div>
 
