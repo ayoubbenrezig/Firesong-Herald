@@ -7,6 +7,7 @@
         ClipboardTextIcon,
         GearIcon,
         HouseIcon,
+        SignOutIcon,
         ArrowLineLeftIcon,
         ArrowLineRightIcon,
     } from 'phosphor-svelte';
@@ -45,6 +46,7 @@
         { href: '/app/rsvps',   label: 'RSVPs',     icon: UsersIcon         },
         { href: '/app/servers', label: 'Servers',   icon: HardDrivesIcon    },
         { href: '/app/audit',   label: 'Audit Log', icon: ClipboardTextIcon },
+        { href: '/',            label: 'Home',      icon: HouseIcon         },
     ] as const;
 </script>
 
@@ -122,12 +124,12 @@
                         <GearIcon class="size-4" />
                     </button>
                     <a
-                            href="/"
+                            href="/logout"
                             class="p-2 rounded-lg hover:bg-surface-500/10 transition-colors text-surface-500 hover:text-surface-300"
-                            aria-label="Go to home"
-                            title="Home"
+                            aria-label="Sign out"
+                            title="Sign out"
                     >
-                        <HouseIcon class="size-4" />
+                        <SignOutIcon class="size-4" />
                     </a>
                 </div>
             {/if}
@@ -144,12 +146,12 @@
                     <GearIcon class="size-4" />
                 </button>
                 <a
-                        href="/"
+                        href="/logout"
                         class="p-2 rounded-lg hover:bg-surface-500/10 transition-colors text-surface-500 hover:text-surface-300"
-                        aria-label="Go to home"
-                        title="Home"
+                        aria-label="Sign out"
+                        title="Sign out"
                 >
-                    <HouseIcon class="size-4" />
+                    <SignOutIcon class="size-4" />
                 </a>
             </div>
         {/if}

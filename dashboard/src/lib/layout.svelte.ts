@@ -1,7 +1,4 @@
 const BREAKPOINT = 1024;
-const SWIPE_EDGE_THRESHOLD = 30;   // px from left edge to start swipe
-const SWIPE_MIN_DISTANCE   = 60;   // px minimum horizontal travel
-const SWIPE_AXIS_RATIO     = 2;    // horizontal must be 2× vertical to count
 
 function createLayoutState() {
     let isMobile   = $state(false);
@@ -21,39 +18,11 @@ function createLayoutState() {
             if (!isMobile) mobileOpen = false;
         }
 
-        // ── Swipe-to-open gesture ─────────────────────────────────────────────
-        let touchStartX = 0;
-        let touchStartY = 0;
-
-        function handleTouchStart(e: TouchEvent): void {
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-        }
-
-        function handleTouchEnd(e: TouchEvent): void {
-            if (!isMobile || mobileOpen) return;
-
-            const dx = e.changedTouches[0].clientX - touchStartX;
-            const dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
-
-            const startedAtEdge = touchStartX <= SWIPE_EDGE_THRESHOLD;
-            const movedEnough   = dx >= SWIPE_MIN_DISTANCE;
-            const clearlyHoriz  = dx > dy * SWIPE_AXIS_RATIO;
-
-            if (startedAtEdge && movedEnough && clearlyHoriz) {
-                mobileOpen = true;
-            }
-        }
-
         handleResize();
         window.addEventListener('resize', handleResize);
-        document.addEventListener('touchstart', handleTouchStart, { passive: true });
-        document.addEventListener('touchend',   handleTouchEnd,   { passive: true });
 
         return () => {
             window.removeEventListener('resize', handleResize);
-            document.removeEventListener('touchstart', handleTouchStart);
-            document.removeEventListener('touchend',   handleTouchEnd);
         };
     }
 
