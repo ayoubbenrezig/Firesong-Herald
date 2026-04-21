@@ -21,7 +21,7 @@
 
             <div class="px-8 py-6 border-b border-surface-200 dark:border-surface-800">
                 <h1 class="text-xl font-bold text-surface-900 dark:text-surface-50">Terms of Service</h1>
-                <p class="text-sm text-surface-500 mt-1">Last updated: April 2025</p>
+                <p class="text-sm text-surface-500 mt-1">Last updated: April 2026</p>
             </div>
 
             <div class="px-8 py-6 space-y-6 text-sm text-surface-700 dark:text-surface-300 leading-relaxed">
