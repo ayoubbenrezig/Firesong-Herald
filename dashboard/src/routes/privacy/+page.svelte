@@ -21,7 +21,7 @@
 
             <div class="px-8 py-6 border-b border-surface-200 dark:border-surface-800">
                 <h1 class="text-xl font-bold text-surface-900 dark:text-surface-50">Privacy Policy</h1>
-                <p class="text-sm text-surface-500 mt-1">Last updated: April 2025</p>
+                <p class="text-sm text-surface-500 mt-1">Last updated: April 2026</p>
             </div>
 
             <div class="px-8 py-6 space-y-6 text-sm text-surface-700 dark:text-surface-300 leading-relaxed">
@@ -30,18 +30,28 @@
                     <h2 class="font-semibold text-surface-900 dark:text-surface-100">1. Who We Are</h2>
                     <p>
                         Firesong Herald is a free, non-commercial, open-source Discord event management service operated by
-                        Ben Firesong. This policy explains what data we collect, why, and how long we keep it.
+                        Ben Firesong (a pseudonym). This policy explains what data we collect, why, and how long we keep it.
                         Contact: <a href="mailto:contact@firesongherald.com" class="underline hover:text-surface-900 dark:hover:text-surface-50">contact@firesongherald.com</a>
                     </p>
                 </section>
 
                 <section class="space-y-2">
                     <h2 class="font-semibold text-surface-900 dark:text-surface-100">2. Legal Basis</h2>
-                    <p>
-                        We process your personal data on the basis of your consent (Article 6(1)(a) GDPR), given when you
-                        sign in and accept these terms, and where necessary for the performance of the service you requested
-                        (Article 6(1)(b) GDPR).
-                    </p>
+                    <p>We process your personal data under the following legal bases:</p>
+                    <ul class="list-disc list-inside space-y-1 ml-2">
+                        <li>
+                            <span class="font-medium text-surface-800 dark:text-surface-200">Contract performance (Article 6(1)(b) GDPR)</span> —
+                            processing your Discord identity and session data is necessary to provide the service. Without it, you cannot sign in or use the dashboard.
+                        </li>
+                        <li>
+                            <span class="font-medium text-surface-800 dark:text-surface-200">Consent (Article 6(1)(a) GDPR)</span> —
+                            sending you event reminders via Discord DM is based on your consent, given when you sign in and accept these terms. You may withdraw this at any time in your dashboard settings.
+                        </li>
+                        <li>
+                            <span class="font-medium text-surface-800 dark:text-surface-200">Legitimate interests (Article 6(1)(f) GDPR)</span> —
+                            retaining audit logs for server moderation purposes, where the legitimate interest of server administrators in accountability outweighs the minimal impact on individual privacy.
+                        </li>
+                    </ul>
                 </section>
 
                 <section class="space-y-2">
@@ -116,11 +126,18 @@
                 </section>
 
                 <section class="space-y-2">
-                    <h2 class="font-semibold text-surface-900 dark:text-surface-100">7. Data Sharing</h2>
+                    <h2 class="font-semibold text-surface-900 dark:text-surface-100">7. Data Sharing & Third-Country Transfers</h2>
                     <p>
                         We do not sell, share, or transfer your personal data to third parties. Your data is not used for
-                        advertising or profiling. We use Discord's API to authenticate you — Discord's own privacy policy
-                        applies to data held by Discord.
+                        advertising or profiling.
+                    </p>
+                    <p>
+                        We use Discord's API to authenticate you. During sign-in, your Discord identity data passes through
+                        Discord's infrastructure, which is operated by Discord Inc., a US-based company. This constitutes a
+                        transfer of personal data to a third country. Discord Inc. participates in the EU–US Data Privacy
+                        Framework, which provides an adequacy basis for such transfers under Article 45 GDPR.
+                        Discord's own privacy policy applies to data held by Discord:
+                        <a href="https://discord.com/privacy" class="underline hover:text-surface-900 dark:hover:text-surface-50" target="_blank" rel="noopener noreferrer">discord.com/privacy</a>.
                     </p>
                 </section>
 
